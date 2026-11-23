@@ -166,7 +166,10 @@ async function renderEval() {
       h('tbody', {}, E.misses.slice(0, 40).map(m => h('tr', {}, h('td', {}, m.prompt.length > 110 ? m.prompt.slice(0, 108) + '…' : m.prompt), h('td', {}, m.pick), h('td', {}, m.best), h('td', { class: 'muted' }, m.yes.join(', ') || '–'))))));
   $('#view').replaceChildren(card, misses, h('div', { class: 'card' }, h('h2', {}, 'Now make your own'), h('p', { class: 'intro' }, 'Put a few prompts from your own project in ', h('code', {}, 'starter/my-eval.js'), ', each with a check, then run ', h('code', {}, 'npm run my-eval'), '. It runs every option on them, grades every reply, and scores your routers the same way.')));
 }
-boot().catch(e => $('#view').replaceChildren(h('div', { class: 'card note' }, e.message)));
+boot().catch(e => $('#view').replaceChildren(h('div', { class: 'card note' },
+  location.hostname.endsWith('github.io') || /JSON|fetch/i.test(e.message)
+    ? ['This page runs on your own machine. Clone the repo and run ', h('code', {}, 'npm run app'), ', then open http://localhost:3401. See ', h('a', { href: 'https://github.com/Rhys-Lindmark/model-router-workshop' }, 'the README'), '.']
+    : e.message)));
 </script>
 </body>
 </html>

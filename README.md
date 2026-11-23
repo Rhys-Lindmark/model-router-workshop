@@ -17,7 +17,7 @@ On my eval’s 168 test prompts:
 
 The live version of my router: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).
 
-**[Slides](slides/index.html)** (`npm run slides`) · **[Workshop guide](docs/WORKSHOP.md)** · **[Keys](docs/KEYS.md)** · **[Facilitator guide](docs/FACILITATOR.md)** · **[For coding agents](AGENTS.md)**
+**[Slides](https://rhys-lindmark.github.io/model-router-workshop/slides/)** · **[Workshop guide](docs/WORKSHOP.md)** · **[Keys](docs/KEYS.md)** · **[Facilitator guide](docs/FACILITATOR.md)** · **[For coding agents](AGENTS.md)**
 
 ## Start
 
@@ -74,7 +74,7 @@ Targets for your table on my eval. Each also has to beat random routing:
 
 ## Present
 
-- `npm run slides`, then ← → to move and reveal, **N** for speaker notes, **P** for the presenter view (current and next slide, notes, timer), **F** for fullscreen. To print or save a PDF, use the browser’s Print.
+- The deck is online at [rhys-lindmark.github.io/model-router-workshop/slides/](https://rhys-lindmark.github.io/model-router-workshop/slides/), or run it locally with `npm run slides` (works offline). Use ← → to move and reveal, **N** for speaker notes, **P** for the presenter view (current and next slide, notes, timer), **F** for fullscreen. To print or save a PDF, use the browser’s Print.
 - Two run-of-shows, 15 and 45 minutes, are in [docs/FACILITATOR.md](docs/FACILITATOR.md).
 - The first version of the talk, a straight 15-minute presentation, is archived in [slides/v1/](slides/v1/) with its PDF.
 
