@@ -36,3 +36,10 @@ test('Perfect routing: 97.0% at $1.70', () => {
 test('Every table ends in a row that always matches', () => {
   for (const t of [ROUTER_V2, TABLE]) assert.equal(t.at(-1).test({}), true);
 });
+
+test('Starter eval checks accept right replies and reject wrong ones', async () => {
+  const { MY_EVAL } = await import('../starter/my-eval.js');
+  const right = ['Brasília', '582,552', '3948725172', 'Sunday', '63', 'Wild wind and rain fall. Thick clouds rush past, dark and loud; a storm is coming upon our town. All of us hurry, shutting doors as lightning cracks and booms roll on and on. Trains stop, birds go mum, and dogs hunt for a dry spot to stay still until it is past.'];
+  const wrong = ['Rio de Janeiro', '582,553', '3948725171', 'Monday', '1963', 'The storm rolled in.'];
+  MY_EVAL.forEach((e, i) => { assert.equal(e.check(`Working...\n${right[i]}`), true, `right ${i}`); assert.equal(e.check(`Working...\n${wrong[i]}`), false, `wrong ${i}`); });
+});

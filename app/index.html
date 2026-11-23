@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Model Router</title>
+<style>
+:root { --bg: #fbfbfa; --card: #fff; --ink: #161615; --ink-2: #55544f; --ink-3: #8d8c84; --line: #e4e3de; --accent: #2a78d6; --accent-bg: #eaf2fc; --warn: #c4521f; --warn-bg: #fbeee8; --good: #0a7d0a; --good-bg: #e8f5e8; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+@media (prefers-color-scheme: dark) { :root { --bg: #111110; --card: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8d8c84; --line: #34332f; --accent: #3987e5; --accent-bg: #18263a; --warn: #e2703f; --warn-bg: #33201a; --good: #3cb93c; --good-bg: #17291a; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+.shell { max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px; }
+header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h1 { font-size: 24px; margin: 0; }
+h2 { font-size: 18px; margin: 0 0 6px; }
+h3 { font-size: 13px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; }
+.keys { display: flex; gap: 8px; font: 12px var(--mono); }
+.pill { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; color: var(--ink-3); }
+.pill.on { color: var(--good); border-color: var(--good); }
+.tabs { display: flex; gap: 6px; margin: 20px 0 16px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: var(--card); color: var(--ink-2); border-radius: 8px; padding: 8px 14px; cursor: pointer; font: inherit; text-align: left; }
+.tab b { display: block; color: var(--ink); font-size: 14px; }
+.tab small { font-size: 12px; }
+.tab.on { border-color: var(--accent); background: var(--accent-bg); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+.intro { color: var(--ink-2); margin: 0 0 12px; }
+.intro code, .file { font: 13px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; text-align: left; max-width: 100%; }
+.chip:hover, .chip.on { border-color: var(--accent); }
+.chip small { color: var(--ink-3); }
+form { display: flex; gap: 8px; }
+input { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
+button.run { font: inherit; padding: 9px 16px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+button.run:disabled { opacity: .5; cursor: default; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+.pick { display: flex; gap: 24px; align-items: baseline; flex-wrap: wrap; }
+.pick strong { font-size: 22px; }
+.k { font: 12px var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; display: block; }
+.trace-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.trace-row:first-child { border-top: 0; }
+.q { font-size: 14px; }
+.q .mine { font: 11px var(--mono); color: var(--accent); margin-left: 6px; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 4px; grid-column: 1 / -1; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.read { font: 13px var(--mono); }
+.read.yes { color: var(--good); } .read.no { color: var(--ink-3); }
+.levels { font: 12px var(--mono); color: var(--ink-3); grid-column: 1 / -1; }
+.levels b { color: var(--ink); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th { text-align: left; font-weight: 500; color: var(--ink-3); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td.r, th.r { text-align: right; font-family: var(--mono); }
+tr.hit td { background: var(--accent-bg); color: var(--ink); font-weight: 600; }
+tr.miss td { color: var(--ink-3); }
+tr.mine td { background: var(--accent-bg); }
+tr.anti td { background: var(--warn-bg); }
+.ok { color: var(--good); } .bad { color: var(--warn); }
+.note { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 8px; padding: 10px 12px; color: var(--ink); }
+.muted { color: var(--ink-3); font-size: 13px; }
+pre { font: 12px/1.5 var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow: auto; max-height: 280px; white-space: pre-wrap; }
+details summary { cursor: pointer; color: var(--ink-2); }
+.reply { white-space: pre-wrap; font-size: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-top: 10px; max-height: 360px; overflow: auto; }
+.evalbox { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.evalbox span { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+.evalbox span.pass { border-color: var(--good); color: var(--good); } .evalbox span.fail { border-color: var(--warn); color: var(--warn); }
+.evalbox span.picked { outline: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header><h1>Your Model Router</h1><div class="keys" id="keys"></div></header>
+  <div class="tabs" id="tabs">
+    <button class="tab" data-level="1"><b>Level 1 · Ask for the decision</b><small>starter/choice.js</small></button>
+    <button class="tab" data-level="2"><b>Level 2 · Judgments + a table</b><small>starter/questions.js · starter/policy.js</small></button>
+    <button class="tab" data-level="3"><b>Level 3 · Check it with an eval</b><small>168 graded prompts</small></button>
+  </div>
+  <div id="view"></div>
+  <p class="muted">Edit your files in <span class="file">starter/</span>, then refresh this page. Rhys’s version of this page: <a href="https://ai.rhyslindmark.com/jev/model-router">ai.rhyslindmark.com/jev/model-router</a> · Jev docs: <a href="https://docs.typesafe.ai/">docs.typesafe.ai</a></p>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const h = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k.startsWith('on')) e[k] = v; else if (v != null) e.setAttribute(k, v); } for (const k of kids.flat()) if (k != null) e.append(k); return e; };
+const pct = x => `${(x * 100).toFixed(1)}%`;
+const api = async (path, data) => { const r = await fetch(path, data ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) } : {}); const j = await r.json(); if (j.error) throw new Error(j.error); return j; };
+let S, level = Number(localStorage.getItem('level') || 1), current = null;
+
+async function boot() {
+  S = await api('/api/state');
+  $('#keys').replaceChildren(h('span', { class: 'pill' + (S.keys.jev ? ' on' : '') }, `Jev key ${S.keys.jev ? '✓' : '–'}`), h('span', { class: 'pill' + (S.keys.openrouter ? ' on' : '') }, `OpenRouter key ${S.keys.openrouter ? '✓' : '–'}`));
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => { level = Number(t.dataset.level); try { localStorage.setItem('level', level); } catch {} current = null; render(); });
+  render();
+}
+
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', Number(t.dataset.level) === level));
+  if (level === 3) return renderEval();
+  const intro = level === 1
+    ? [h('h2', {}, 'Ask Jev which model to use'), h('p', { class: 'intro' }, 'One Choice question, and the top answer is the route. This is the router most people write first. Pick a few prompts. Would you trust these picks? Why or why not? Your question lives in ', h('code', {}, 'starter/choice.js'), '.')]
+    : [h('h2', {}, 'Jev judges. Code decides.'), h('p', { class: 'intro' }, 'Jev answers small questions about the prompt with probabilities. Your table in ', h('code', {}, 'starter/policy.js'), ' turns them into a model and an effort. First match wins. Add questions in ', h('code', {}, 'starter/questions.js'), '.')];
+  const input = h('input', { placeholder: S.keys.jev ? 'Type any prompt' : 'Typing your own prompt needs a Jev key; the prompts below work without one', maxlength: 2000 });
+  if (current && !current.id && current.data?.prompt) input.value = current.data.prompt;
+  const form = h('form', { onsubmit: e => { e.preventDefault(); go({ prompt: input.value }); } }, input, h('button', { class: 'run' }, 'Route'));
+  const chips = h('div', { class: 'chips' }, S.chips.map(c => h('button', { class: 'chip' + (current?.id === c.id ? ' on' : ''), onclick: () => go({ id: c.id }) }, c.prompt.length > 70 ? c.prompt.slice(0, 68) + '…' : c.prompt, ' ', h('small', {}, c.difficulty))));
+  $('#view').replaceChildren(h('div', { class: 'card' }, ...intro, form, chips, h('p', { class: 'muted' }, 'Prompts with a difficulty tag come from the eval, with Jev’s saved answers and how every model did.')), h('div', { id: 'out' }));
+  if (current) show(current.data);
+}
+
+async function go(q) {
+  current = { id: q.id || null, data: null };
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  $('#out').replaceChildren(h('div', { class: 'card muted' }, 'Asking Jev…'));
+  try { current.data = await api('/api/route', { level, ...q }); show(current.data); render(); }
+  catch (e) { $('#out').replaceChildren(h('div', { class: 'card note' }, e.message)); }
+}
+
+function evalStrip(d, option) {
+  if (!d.eval) return null;
+  return h('div', {}, h('span', { class: 'k' }, 'In the eval, each option on this prompt'), h('div', { class: 'evalbox' }, Object.entries(d.eval).map(([o, r]) => h('span', { class: (r.pass ? 'pass' : 'fail') + (o === option ? ' picked' : '') }, `${o} ${r.pass ? '✓' : '✗'} $${(r.cost_usd * 1000).toFixed(2)}/1k`))));
+}
+function answerBox(d, option) {
+  const out = h('div');
+  const btn = h('button', { class: 'run', onclick: async () => { btn.disabled = true; btn.textContent = 'Answering…'; try { const r = await api('/api/answer', { prompt: d.prompt, option }); out.replaceChildren(r.needs ? h('p', { class: 'note' }, r.needs) : h('div', {}, h('div', { class: 'reply' }, r.text || '(empty reply)'), h('p', { class: 'muted' }, `${r.model} · ${r.usage?.completion_tokens ?? '?'} tokens out${r.usage?.cost != null ? ` · $${r.usage.cost.toFixed(6)}` : ''}`))); } catch (e) { out.replaceChildren(h('p', { class: 'note' }, e.message)); } btn.textContent = 'Answer again'; btn.disabled = false; } }, `Answer with ${S.options[option]}`);
+  return h('div', { style: 'margin-top:12px' }, S.keys.openrouter ? btn : h('p', { class: 'muted' }, 'Add an OpenRouter key to have the picked model answer.'), out);
+}
+
+function show(d) {
+  if (d.needs) return $('#out').replaceChildren(h('div', { class: 'card note' }, d.needs));
+  const meta = d.live ? `${d.live.model} · ${d.live.ms} ms · live` : 'Jev’s answers saved from the eval';
+  const pickCard = h('div', { class: 'card' }, h('div', { class: 'pick' },
+    h('div', {}, h('span', { class: 'k' }, 'Route'), h('strong', {}, d.option ? S.options[d.option] : `“${d.top}” isn’t a tier`)),
+    level === 2 && d.compare.choice ? h('div', {}, h('span', { class: 'k' }, 'Level 1 would pick'), S.options[d.compare.choice]) : null,
+    level === 2 ? h('div', {}, h('span', { class: 'k' }, 'Rhys’s Router v2 picks'), S.options[d.compare.v2]) : null),
+    h('p', { class: 'muted' }, d.prompt.slice(0, 300), ' · ', meta), d.option ? evalStrip(d, d.option) : null, d.option ? answerBox(d, d.option) : null);
+  let left, right;
+  if (level === 1) {
+    const probs = Object.entries(d.probabilities).sort((a, b) => b[1] - a[1]);
+    left = h('div', { class: 'card' }, h('h3', {}, 'Jev’s answer'), h('p', { class: 'q' }, S.level1.question.instructions),
+      probs.map(([k, p]) => h('div', { class: 'trace-row' }, h('span', { class: 'q' }, k, ' ', h('span', { class: 'muted' }, S.level1.question.criteria[k] || '')), h('span', { class: 'read' + (k === d.top ? ' yes' : ' no') }, p.toFixed(2)), h('div', { class: 'bar' }, h('i', { style: `width:${p * 100}%` })))));
+    right = h('div', { class: 'card' }, h('h3', {}, 'The code'), h('pre', {}, `top = argmax(probabilities)      // "${d.top}"\nroute = top + ":${S.level1.effort}"`), h('p', { class: 'muted' }, 'That’s all the code there is. Nothing to read about why, no rows to change. To change the policy, you rewrite the question.'));
+  } else {
+    left = h('div', { class: 'card' }, h('h3', {}, 'Judgment trace · Jev'), d.trace.map(t => t.type === 'score'
+      ? h('div', { class: 'trace-row' }, h('span', { class: 'q' }, t.instructions), h('span', { class: 'read yes' }, t.read), h('div', { class: 'levels' }, t.levels.flatMap(([n, p]) => [p === Math.max(...t.levels.map(x => x[1])) ? h('b', {}, `${n} ${p.toFixed(2)}`) : `${n} ${p.toFixed(2)}`, '   '])))
+      : h('div', { class: 'trace-row' }, h('span', { class: 'q' }, t.instructions, t.mine ? h('span', { class: 'mine' }, 'yours') : null), h('span', { class: 'read ' + t.read }, `${t.p.toFixed(2)} ${t.read}`), h('div', { class: 'bar' }, h('i', { style: `width:${t.p * 100}%` })))));
+    right = h('div', { class: 'card' }, h('h3', {}, 'Your table · code · first match wins'), h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, '#'), h('th', {}, 'If'), h('th', {}, 'Then'))),
+      h('tbody', {}, S.level2.table.map((r, i) => h('tr', { class: i === d.row ? 'hit' : i < d.row ? 'miss' : '' }, h('td', {}, i + 1), h('td', {}, r.when || '(no label)'), h('td', {}, r.option))))),
+      h('p', { class: 'muted' }, 'Yes means Jev’s probability is at least 0.5. Grey rows were tried and didn’t match.'));
+  }
+  $('#out').replaceChildren(pickCard, h('div', { class: 'grid' }, left, right),
+    h('details', { class: 'card' }, h('summary', {}, 'API call: the exact request to Jev'), h('pre', {}, `POST https://api.typesafe.ai/v1/systemone\nAuthorization: Bearer $TYPESAFE_API_KEY\n\n${JSON.stringify(d.request, null, 2)}`)));
+}
+
+async function renderEval() {
+  $('#view').replaceChildren(h('div', { class: 'card muted' }, 'Scoring…'));
+  const E = await api('/api/eval');
+  const card = h('div', { class: 'card' }, h('h2', {}, 'How do you know it’s right?'),
+    h('p', { class: 'intro' }, `Every one of these ${E.n} prompts was run on all six options and graded by code. So any router can be scored by looking up how its picks did. “Beats random” deals the router’s same mix of picks to prompts at random; a router has to score above the 95th percentile of those shuffles. Your rows update when you edit starter/ and refresh.`),
+    E.notes.map(n => h('p', { class: 'note' }, n)),
+    h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Policy'), h('th', { class: 'r' }, 'Passed'), h('th', { class: 'r' }, '$ / 1,000'), h('th', {}, 'Beats random?'))),
+      h('tbody', {}, E.rows.map(r => h('tr', { class: ['starter', 'mychoice'].includes(r.key) ? 'mine' : r.key === 'choice' ? 'anti' : '' }, h('td', {}, r.name), h('td', { class: 'r' }, pct(r.pass)), h('td', { class: 'r' }, `$${r.cost.toFixed(2)}`),
+        h('td', {}, r.beats == null ? '' : h('span', { class: r.beats ? 'ok' : 'bad' }, `${r.beats ? 'yes' : 'no'} (p95 ${pct(r.p95)})`)))))));
+  const misses = h('div', { class: 'card' }, h('h2', {}, `Where your table was too weak (${E.misses.length})`),
+    h('p', { class: 'intro' }, 'Prompts your table sent to an option that failed, when another option passed. What do they have in common? That’s your next question or row.'),
+    h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Prompt'), h('th', {}, 'Picked'), h('th', {}, 'Cheapest pass'), h('th', {}, 'Jev said yes to'))),
+      h('tbody', {}, E.misses.slice(0, 40).map(m => h('tr', {}, h('td', {}, m.prompt.length > 110 ? m.prompt.slice(0, 108) + '…' : m.prompt), h('td', {}, m.pick), h('td', {}, m.best), h('td', { class: 'muted' }, m.yes.join(', ') || '–'))))));
+  $('#view').replaceChildren(card, misses, h('div', { class: 'card' }, h('h2', {}, 'Now make your own'), h('p', { class: 'intro' }, 'Put a few prompts from your own project in ', h('code', {}, 'starter/my-eval.js'), ', each with a check, then run ', h('code', {}, 'npm run my-eval'), '. It runs every option on them, grades every reply, and scores your routers the same way.')));
+}
+boot().catch(e => $('#view').replaceChildren(h('div', { class: 'card note' }, e.message)));
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
-// YOUR ROUTER. Jev judges each prompt; this table decides.
+// LEVEL 2 · YOUR TABLE. Jev judges each prompt; this table decides.
 //
+//   npm run app                                  Level 2 tab: click prompts, see which row matches
 //   npm run score -- --policy starter            score it on 168 held-out prompts
 //   npm run score -- --policy starter --misses   see what it got wrong
 //   npm run route -- --policy starter "Count the r's in strawberry"

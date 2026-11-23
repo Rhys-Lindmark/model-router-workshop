@@ -9,6 +9,7 @@ import { ALL_QUESTIONS, V1_QUESTIONS, V2_QUESTIONS } from './questions.js';
 import { askJev } from './jev.js';
 import { DEPTH, ROUTER_V2, TIERS, optionName, route, routeV1, routeChoice, ROUTER_V1 } from './policy.js';
 import { loadEval } from './eval.js';
+import { callModel } from './router.js';
 
 const args = process.argv.slice(2);
 const val = f => { const i = args.indexOf(f); if (i < 0) return null; const v = args[i + 1]; args.splice(i, 2); return v; };
@@ -77,16 +78,11 @@ if (task) {
 
 // ---- Optional: actually call the model ----------------------------------------
 if (run) {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) { console.error('\nOPENROUTER_API_KEY is not set (.env). --run sends the prompt to the picked model.'); process.exit(1); }
   const [tier, effort] = picked.split(':');
   console.log(c.dim(`\nCalling ${TIERS[tier].openrouter} with reasoning effort ${effort}…`));
-  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: TIERS[tier].openrouter, messages: [{ role: 'user', content: task ? task.prompt : prompt }], reasoning: { effort }, max_tokens: effort === 'high' ? 8000 : 2000, usage: { include: true } })
-  });
-  const d = await r.json();
-  if (!r.ok) { console.error(`OpenRouter HTTP ${r.status}: ${JSON.stringify(d).slice(0, 300)}`); process.exit(1); }
-  console.log(`\n${d.choices?.[0]?.message?.content ?? '(no reply)'}\n`);
-  if (d.usage) console.log(c.dim(`${d.usage.prompt_tokens} in · ${d.usage.completion_tokens} out${d.usage.cost != null ? ` · $${d.usage.cost.toFixed(6)}` : ''}`));
+  try {
+    const d = await callModel(picked, task ? task.prompt : prompt);
+    console.log(`\n${d.text || '(no reply)'}\n`);
+    if (d.usage) console.log(c.dim(`${d.usage.prompt_tokens} in · ${d.usage.completion_tokens} out${d.usage.cost != null ? ` · $${d.usage.cost.toFixed(6)}` : ''}`));
+  } catch (e) { console.error(`\n${e.message}`); process.exit(1); }
 }

@@ -1,75 +1,72 @@
 # Workshop guide
 
-Four steps. Steps 1 to 3 need no API keys and no internet once you’ve cloned. Each step ends with a checkpoint.
+Three levels. At each one, the talk shows my version first, and then you build yours. Everything until “Connect your keys” works offline with no keys.
 
-## Step 1 · Score every policy
-
-```bash
-npm run score
-```
-
-Every one of the 168 prompts was already run on every option (three model sizes × two reasoning efforts) and graded by code, so scoring a routing policy is a lookup. It takes under a second.
-
-**Checkpoint.** You should see these rows, among others:
-
-```text
-Perfect routing (cheapest option that passed)    97.0%   $1.70
-Router v3: Jev judgments + learned odds          93.5%   $3.25  yes (p95 90.5%)
-Always Qwen 3.7 Plus · high effort               93.5%   $3.32
-Router v2: Jev judgments + table                 91.1%   $3.20  yes (p95 88.7%)
-"Which model should I use?" (high effort)        85.7%   $7.36  yes (p95 81.5%)
-Router v1: the original table                    80.4%   $2.76  yes (p95 78.6%)
-```
-
-The last column is the random-routing test. It keeps a router’s mix of picks and deals them to prompts at random 10,000 times. A router “beats random” if it scores above the 95th percentile of those shuffles. A router that can’t beat random isn’t routing: it’s a price mix.
-
-## Step 2 · Route a prompt
+## Setup
 
 ```bash
-npm run route -- --offline calendar-15
+git clone https://github.com/Rhys-Lindmark/model-router-workshop.git
+cd model-router-workshop
+npm run doctor
+npm run app        # http://localhost:3401
 ```
 
-This replays a prompt from the eval with Jev’s saved answers. You’ll see:
+Or paste this into your coding agent: “Set up https://github.com/Rhys-Lindmark/model-router-workshop and help me build my own model router. Follow its AGENTS.md.”
 
-1. **Jev judges.** Each question about the prompt and the probability Jev gave it.
-2. **Code decides.** The Router v2 table, with the first row that matched.
-3. **Route.** The model and effort, what “Which model should I use?” would have picked, and how the pick did in the eval.
+**Checkpoint.** `localhost:3401` shows “Your Model Router” with three tabs.
 
-Try other ids from the eval: `letters-01`, `multiply-14`, `lipogram-08`, `knights-05`. `npm run score -- --policy v2 --misses` lists more, with their ids.
+## Connect your keys
 
-With a `TYPESAFE_API_KEY` in `.env`, route your own prompts live:
+Follow [KEYS.md](KEYS.md): a Jev key from [console.typesafe.ai/keys](https://console.typesafe.ai/keys) and an OpenRouter key from [openrouter.ai/keys](https://openrouter.ai/keys), pasted into `.env` in your editor.
 
 ```bash
-npm run route -- "Write a haiku about Monday mornings"
-npm run route -- --policy v1 "Review the non-compete clause in my contract"
-npm run route -- --json "Convert 72°F to Celsius"     # the exact Jev request and response
+cp .env.example .env
+npm run doctor -- --live
 ```
 
-With an `OPENROUTER_API_KEY` too, add `--run` to send the prompt to the model the router picked.
+**Checkpoint.** Two ✓ lines, and both pills in the app’s header turn green after a refresh. No key yet? Keep going: every step works on the eval prompts.
 
-**Checkpoint.** For `calendar-15` the route is `Qwen 3.7 Plus · high effort (sonnet:high)`, from row 1, “Exact details and a long procedure”.
+## Level 1 · Ask for the decision
 
-## Step 3 · Write your own table
+My first router was one Choice question: “Which model should I use for this prompt?”, and it took the top answer.
 
-Open [starter/policy.js](../starter/policy.js). It starts with a single row, “always the medium model at low effort”:
+1. In the app, open **Level 1** and click the prompts. Each shows Jev’s probabilities, the pick, and how every option actually did on that prompt in the eval.
+2. With a Jev key, type your own prompt. With an OpenRouter key, click **Answer with…** to have the picked model answer it.
+3. Discuss: is it a good question? Could a smart person answer it from the prompt alone, without asking what you care about?
+4. Open [starter/choice.js](../starter/choice.js) and write a better Choice. For example, describe each option (“small, fast and cheap; misses exact arithmetic”) instead of naming it. Refresh and compare.
+5. Score it: `npm run ask` (Jev key) asks your version about all 168 eval prompts, then `npm run score` or the **Level 3** tab shows it as “Your Choice”.
+
+**Checkpoint.** You can say one thing that’s good about the Choice router and two things that aren’t. Mine scores 85.7% at $7.37 per thousand prompts.
+
+## Level 2 · Judgments + a table
+
+Instead of asking for the decision, ask the questions you’d ask yourself before deciding. Jev judges, and code decides.
+
+1. In the app, open **Level 2**. Click the prompts and read the judgment trace (each question, its probability, yes or no) and the row of your table that matched.
+2. Open [starter/policy.js](../starter/policy.js). It starts as one row, “always the medium model at low effort”. Add rows above it. Each row tests the judgments `j` and returns an option:
+
+   ```js
+   { when: 'Exact letters, words or digits', test: j => j.exact_details, option: 'sonnet:high' },
+   ```
+
+   You can use my nine judgments straight away: `exact_details`, `long_procedure`, `quick_recall`, `writes_code`, `large_output`, `expertise`, `high_stakes`, `nuanced_writing` and `depth`.
+3. Write a judgment of your own in [starter/questions.js](../starter/questions.js). It has to pass the human test. Refresh the app: typed prompts ask it live, and it shows up in the trace marked “yours”. `npm run ask` gets its answers for all 168 eval prompts.
+4. In the terminal: `npm run route -- --policy starter "How many r's are in strawberry?"`.
+
+**Checkpoint.** Your table has at least three rows, and you can explain each in one sentence.
+
+## Level 3 · Check it with an eval
+
+How do you know a route was right? Run every option on prompts you can grade, then look up what each router picked.
+
+### Score your table on my eval
 
 ```bash
-npm run score -- --policy starter
+npm run score                                 # every router, offline, under a second
+npm run score -- --policy starter --misses    # yours, with targets and what it got wrong
 ```
 
-That scores 89.3% at $2.74, which already beats “Which model should I use?”, but it doesn’t beat random routing, because it isn’t routing. Add rows above the last one. Each row tests the judgments `j` and returns an option:
-
-```js
-{ when: 'Exact letters, words or digits', test: j => j.exact_details, option: 'sonnet:high' },
-```
-
-After each change:
-
-```bash
-npm run score -- --policy starter --misses
-```
-
-`--misses` lists the prompts your table sent to an option that failed when another option passed, grouped by category, with Jev’s yes answers for each. Read them and ask what they have in common. That’s how Router v2 was written.
+Or open the app’s **Level 3** tab. The misses list shows prompts your table sent to an option that failed when another passed, with Jev’s yes answers. What do they have in common? That’s your next row or question.
 
 | | Goal | Passed | Cost per 1,000 |
 | - | - | - | - |
@@ -77,13 +74,7 @@ npm run score -- --policy starter --misses
 | Silver | Beat Router v2 | > 91.1% | ≤ $3.32 |
 | Gold | Match the best fixed choice (medium model, high effort) for less | ≥ 93.5% | < $3.32 |
 
-Each also has to beat random routing.
-
-Hints, if you want them:
-
-1. The small model miscounts. Where should `j.exact_details` go?
-2. Easy lookups don’t need the medium model. Try `j.quick_recall`.
-3. Gold takes three rows.
+Each also has to beat random routing: the same mix of picks dealt to prompts at random, 10,000 times.
 
 <details>
 <summary>One Gold table (spoiler)</summary>
@@ -96,28 +87,38 @@ export const TABLE = [
 ];
 ```
 
-93.5% at $3.30, beating random (p95 92.9%). It passes the same 157 prompts as always using the medium model at high effort, for slightly less. Notice how close that is to a fixed choice: on this prompt set, most of the routing win is against the large model.
+93.5% at $3.30, beating random (p95 92.9%). It passes the same 157 prompts as always using the medium model at high effort, for slightly less. On this prompt set, most of the routing win is against the large model.
 
 </details>
 
-**A fair warning.** You’re tuning on the test set: you can see which prompts failed. The real eval built Router v2 from 60 separate training prompts and only then scored it on these 168. A row you can explain in one plain sentence is worth more than one extra point.
+**A fair warning.** You can see the test results, so you can overfit. I built Router v2 from 60 separate training prompts and only then scored it on these 168. A row you can explain in one sentence is worth more than one extra point.
 
-**Checkpoint.** Your table beats random routing and earns at least Bronze.
+### Build your own eval
 
-## Step 4 (bonus) · Ask Jev a new question
+My eval is puzzles. Yours should be your product’s real prompts.
 
-Router v2 got better than v1 because of better questions, not better thresholds. Write one of your own in [starter/questions.js](../starter/questions.js). A good router question is a judgment about the prompt that a smart person could make from the prompt alone, without asking what you care about. “Does a correct answer depend on exact digits?” is a judgment. “Does this need a big model?” is a decision.
+1. Open [starter/my-eval.js](../starter/my-eval.js). Replace the examples with 5 to 10 prompts from your own project. Give each a `check`: code that says whether a reply is right. Helpers: `number(n)`, `says('word')`, `without('e')`, `atLeastWords(n)`, `all(...)`, or any function of the reply text.
+2. Run it (both keys; capped at $1, change with `MY_EVAL_BUDGET_USD`):
+
+   ```bash
+   npm run my-eval
+   ```
+
+   It runs every prompt on all six options, grades every reply, asks Jev your questions, and scores fixed choices, perfect routing, the Choice router, Router v2 and your table on your prompts.
+3. Read the failed replies in `data/my-eval-results.json` before you trust a check. A wrong check is the most common eval bug.
+
+**Checkpoint.** A table of routers scored on your own prompts.
+
+## Done: run your router
 
 ```bash
-npm run ask      # needs TYPESAFE_API_KEY; asks your questions about all 168 prompts
+npm run chat
 ```
 
-The answers are saved to `data/extra-answers.json`. Use them in your table as `j.<name>` (true at ≥ 0.5) or `j.p.<name>` (the probability), then score again. `npm run route -- --policy starter "…"` asks your questions live too.
-
-**Checkpoint.** `npm run ask` prints how many prompts your question said yes to. If it’s 0 or 168, the question can’t split anything: reword it.
+Type prompts. Jev judges, your table picks, the picked model answers, and you see the cost.
 
 ## After the workshop
 
-- `npm test` checks that the repo reproduces the published numbers.
-- To route your own product’s traffic: collect real prompts, grade them by code where you can, run every option you might route to, and score your router against fixed choices, perfect routing and random routing, the same way `src/score.js` does. Keep the table in a file the eval imports, so the eval scores exactly what ships.
-- The live page has the interactive version, the pilot eval and Router v3: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).
+- `src/router.js` has the router as two functions, `routePrompt()` and `callModel()`, to drop into your app.
+- Grow your eval from real traffic. Score your router against fixed choices, perfect routing and random routing every time you change a row or a question. Keep the table in a file the eval imports, so the eval scores exactly what ships.
+- My live page has the interactive version, both evals and Router v3: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).

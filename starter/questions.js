@@ -1,6 +1,7 @@
-// BONUS: ask Jev a question of your own about every prompt.
+// LEVEL 2 · YOUR JUDGMENTS: ask Jev a question of your own about every prompt.
 //
-//   npm run ask        asks Jev these questions about all 168 prompts
+//   npm run app        Level 2 tab: typed prompts ask your questions live (needs a Jev key)
+//   npm run ask        asks Jev these questions about all 168 eval prompts
 //                      (needs TYPESAFE_API_KEY; well under a cent in total)
 //
 // Then use the answer in starter/policy.js as j.<name> (true at ≥ 0.5) or

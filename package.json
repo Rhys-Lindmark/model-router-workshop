@@ -10,6 +10,9 @@
     "score": "node src/score.js",
     "route": "node src/route.js",
     "ask": "node scripts/ask.js",
+    "chat": "node scripts/chat.js",
+    "app": "node scripts/app.js",
+    "my-eval": "node scripts/my-eval.js",
     "slides": "node scripts/serve-slides.js",
     "test": "node --test test/*.test.js"
   },

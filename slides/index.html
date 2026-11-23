@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Model Router Workshop</title>
-<meta name="description" content="Don't ask the model which model. Route prompts with Jev's judgments and a truth table in code. A 15-minute AI Engineer session.">
+<title>Building a Model Router</title>
+<meta name="description" content="A hands-on AI Engineer workshop: build a model router on your own machine with Jev's judgments, a truth table in code, and an eval.">
 <style>
 :root {
   --bg: #111110; --surface: #1a1a19; --surface-2: #232321; --line: #34332f;
@@ -17,66 +17,76 @@
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: var(--sans); }
 body { overflow: hidden; }
 .deck { position: fixed; inset: 0; display: grid; place-items: center; }
-.slide {
-  position: absolute; width: 1280px; height: 720px; padding: 64px 80px;
-  background: var(--surface); display: none; flex-direction: column; gap: 22px;
-  transform-origin: center center; overflow: hidden;
-}
+.slide { position: absolute; width: 1280px; height: 720px; padding: 60px 80px; background: var(--surface); display: none; flex-direction: column; gap: 20px; transform-origin: center center; overflow: hidden; }
 .slide.on { display: flex; }
 .slide .notes { display: none; }
-.kicker { font: 600 15px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.kicker { font: 600 15px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: flex; gap: 12px; align-items: center; }
 .kicker.warn { color: var(--warn); }
-h1 { font-size: 68px; line-height: 1.04; margin: 0; letter-spacing: -.02em; font-weight: 750; }
+.level { font: 700 13px/1 var(--mono); padding: 6px 10px; border-radius: 6px; background: var(--accent); color: #fff; letter-spacing: .06em; }
+.level.you { background: var(--good); }
+h1 { font-size: 80px; line-height: 1.02; margin: 0; letter-spacing: -.02em; font-weight: 750; }
 h2 { font-size: 46px; line-height: 1.1; margin: 0; letter-spacing: -.015em; font-weight: 700; }
-h3 { font-size: 22px; margin: 0 0 8px; color: var(--ink-2); font-weight: 600; }
-p, li { font-size: 26px; line-height: 1.4; color: var(--ink-2); margin: 0; }
-ul { margin: 0; padding-left: 28px; display: grid; gap: 14px; }
+h3 { font-size: 21px; margin: 0 0 8px; color: var(--ink-2); font-weight: 600; }
+p, li { font-size: 25px; line-height: 1.4; color: var(--ink-2); margin: 0; }
+ul, ol { margin: 0; padding-left: 30px; display: grid; gap: 12px; }
 strong { color: var(--ink); }
-.big { font-size: 34px; color: var(--ink); }
+.big { font-size: 32px; color: var(--ink); }
 .muted { color: var(--ink-3); }
-.foot { margin-top: auto; display: flex; justify-content: space-between; font: 15px var(--mono); color: var(--ink-3); }
+.foot { margin-top: auto; display: flex; justify-content: space-between; gap: 20px; font: 15px var(--mono); color: var(--ink-3); }
 code, pre { font-family: var(--mono); }
-pre {
-  margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
-  padding: 20px 24px; font-size: 19px; line-height: 1.5; color: var(--ink-2); white-space: pre; overflow: hidden;
-}
+p code, li code { font-size: .85em; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--ink); }
+pre { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; font-size: 19px; line-height: 1.5; color: var(--ink-2); white-space: pre; overflow: hidden; }
 pre .k { color: #9085e9; } pre .s { color: #8fc98f; } pre .c { color: var(--ink-3); } pre .hit { color: var(--ink); background: rgba(57,135,229,.22); display: inline-block; width: 100%; }
-pre .y { color: var(--good); } pre .n { color: var(--ink-3); } pre .w { color: var(--warn); }
-.row { display: flex; gap: 28px; align-items: stretch; }
-.row > * { flex: 1; }
-.card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; }
-.card .num { font-size: 52px; font-weight: 750; color: var(--ink); letter-spacing: -.02em; }
-.card .num small { font-size: 22px; color: var(--ink-3); font-weight: 500; }
-.card.accent { border-color: var(--accent); }
-.card.warn { border-color: var(--warn); }
-.tag { display: inline-block; font: 600 14px/1 var(--mono); padding: 6px 10px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+pre .y { color: var(--good); } pre .w { color: var(--warn); }
+.row { display: flex; gap: 24px; align-items: stretch; }
+.row > * { flex: 1; min-width: 0; }
+.card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+.card .num { font-size: 50px; font-weight: 750; color: var(--ink); letter-spacing: -.02em; }
+.card .num small { font-size: 21px; color: var(--ink-3); font-weight: 500; }
+.card.accent { border-color: var(--accent); } .card.warn { border-color: var(--warn); } .card.good { border-color: var(--good); }
+.tag { display: inline-block; font: 600 15px/1 var(--mono); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink-2); }
 .tag.ok { color: var(--good); border-color: var(--good); } .tag.bad { color: var(--warn); border-color: var(--warn); }
-.flow { display: flex; align-items: center; gap: 18px; margin-top: 8px; }
-.flow .box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; flex: 1; min-height: 190px; }
+.shot { border: 1px solid var(--line); border-radius: 10px; display: block; max-width: 100%; }
+.agent { background: var(--bg); border: 1px solid var(--accent); border-radius: 12px; padding: 22px 26px; font: 23px/1.45 var(--mono); color: var(--ink); }
+.agent .lbl { display: block; font: 600 13px var(--mono); color: var(--accent); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+.poll { display: grid; gap: 22px; margin-top: 10px; }
+.poll div { display: flex; gap: 22px; align-items: baseline; font-size: 40px; color: var(--ink); font-weight: 650; }
+.poll span { font: 600 22px var(--mono); color: var(--accent); width: 40px; }
+.quiz { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.quiz .card { padding: 16px 20px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.quiz .card p { font-size: 22px; color: var(--ink); }
+.types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.types .card p { font-size: 20px; }
+.types code { color: var(--ink); font-size: 18px; }
+.flow { display: flex; align-items: center; gap: 16px; }
+.flow .box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; flex: 1; }
 .flow .box.jev { border-color: var(--accent); }
-.flow .box h3 { color: var(--ink); font-size: 24px; }
-.flow .box p { font-size: 20px; }
-.flow .arrow { font-size: 34px; color: var(--ink-3); }
-table.t { border-collapse: collapse; width: 100%; font-size: 22px; }
-table.t th { text-align: left; color: var(--ink-3); font-weight: 500; font-size: 16px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-table.t td { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
-table.t td.r { text-align: right; font-family: var(--mono); }
-table.t tr.me td { color: var(--ink); background: rgba(57,135,229,.12); }
-table.t tr.bad td { color: var(--ink); background: rgba(217,89,38,.12); }
+.flow .box h3 { color: var(--ink); font-size: 22px; }
+.flow .box p { font-size: 19px; }
+.flow .arrow { font-size: 32px; color: var(--ink-3); }
+.ladder { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.ladder .card h3 { color: var(--ink); font-size: 22px; }
+.ladder .card p { font-size: 18px; }
+.ladder .card .lv { font: 700 13px var(--mono); color: var(--accent); letter-spacing: .06em; }
+.steps { counter-reset: s; display: grid; gap: 12px; }
+.steps > div { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: baseline; font-size: 23px; color: var(--ink-2); }
+.steps > div::before { counter-increment: s; content: counter(s); font: 700 18px var(--mono); color: var(--bg); background: var(--good); border-radius: 50%; width: 32px; height: 32px; display: grid; place-items: center; }
+.steps code { font-size: 19px; background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 2px 8px; color: var(--ink); }
+.title-slide h1 { font-size: 92px; }
+.repo { font: 22px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 20px; display: inline-block; }
 .chart text { font-family: var(--sans); }
 .chart .lbl { font-size: 16px; fill: var(--ink-2); }
 .chart .lbl.strong { fill: var(--ink); font-weight: 650; }
 .chart .ax { font-size: 14px; fill: var(--ink-3); }
-.chart circle { cursor: default; }
-.title-slide h1 { font-size: 84px; }
-.repo { font: 22px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; display: inline-block; }
+/* reveal on click */
+.frag { visibility: hidden; }
+.frag.shown { visibility: visible; }
 /* chrome */
 .progress { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width .2s; }
 .notes-panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto; background: rgba(17,17,16,.96); border-top: 1px solid var(--line); padding: 16px 24px 22px; font-size: 18px; line-height: 1.5; color: var(--ink-2); display: none; }
 .notes-panel.on { display: block; }
 .notes-panel b { color: var(--ink); }
 .hint { position: fixed; right: 14px; bottom: 10px; font: 12px var(--mono); color: var(--ink-3); opacity: .7; }
-/* presenter view */
 body.presenter { overflow: auto; }
 .presenter-view { display: none; }
 body.presenter .deck, body.presenter .progress, body.presenter .hint { display: none; }
@@ -85,6 +95,8 @@ body.presenter .presenter-view { display: grid; grid-template-columns: 1fr 1fr; 
 .presenter-view .pv-timer { font-size: 40px; color: var(--ink); }
 .presenter-view .pv-frame { position: relative; aspect-ratio: 16 / 9; background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
 .presenter-view .pv-frame .slide { display: flex; position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.presenter-view .pv-frame .frag { visibility: visible; opacity: .35; }
+.presenter-view .pv-frame .frag.shown { opacity: 1; }
 .presenter-view .pv-notes { grid-column: 1 / -1; font-size: 22px; line-height: 1.5; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); padding: 20px 24px; }
 .presenter-view .pv-label { font: 13px var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
 @media print {
@@ -92,6 +104,7 @@ body.presenter .presenter-view { display: grid; grid-template-columns: 1fr 1fr; 
   html, body { overflow: visible; height: auto; background: var(--surface); }
   .deck { position: static; display: block; }
   .slide { display: flex !important; position: relative; transform: none !important; page-break-after: always; break-after: page; }
+  .frag { visibility: visible !important; }
   .progress, .notes-panel, .hint, .presenter-view { display: none !important; }
 }
 </style>
@@ -101,270 +114,303 @@ body.presenter .presenter-view { display: grid; grid-template-columns: 1fr 1fr; 
 
 <!-- 1 -->
 <section class="slide title-slide" data-title="Title">
-  <div class="kicker">AI Engineer · 15-minute session</div>
-  <h1>Don’t ask the model<br>which model.</h1>
-  <p class="big" style="max-width:980px">Route prompts with an LLM’s <strong>judgments</strong> and a <strong>truth table in code</strong>, then prove it with an eval.</p>
-  <div style="margin-top:18px"><span class="repo">git clone https://github.com/Rhys-Lindmark/model-router-workshop</span></div>
+  <div class="kicker">AI Engineer · hands-on</div>
+  <h1>Building a<br>model router</h1>
+  <p class="big">with a judgment model, a truth table, and an eval</p>
+  <div style="margin-top:14px"><span class="repo">github.com/Rhys-Lindmark/model-router-workshop</span></div>
   <div class="foot"><span>Rhys Lindmark</span><span>ai.rhyslindmark.com/jev/model-router</span></div>
-  <aside class="notes">Hi, I’m Rhys. In 15 minutes you’ll see a model router built two ways: the way most of us would build it first, and a way that’s cheaper, more accurate and easier to change. Everything is in the repo on screen. If you want to follow along, clone it now: <b>npm run score</b> needs no API keys and no install.</aside>
+  <aside class="notes">Hi, I’m Rhys. Today we’re going to build a model router, and by the end you’ll have one running on your own laptop. I’ll show you mine at each step, then you build yours. Keep the repo link handy: it’s on almost every slide.</aside>
 </section>
 
 <!-- 2 -->
-<section class="slide" data-title="The problem">
-  <div class="kicker">The problem</div>
-  <h2>Every prompt costs the same to send.<br>Not to answer.</h2>
-  <div class="row" style="margin-top:12px">
-    <div class="card"><h3>Always the small model</h3><div class="num">65.5% <small>passed</small></div><p>$0.51 per 1,000 prompts</p></div>
-    <div class="card"><h3>Always the large model</h3><div class="num">94.6% <small>passed</small></div><p>$11.08 per 1,000 prompts</p></div>
-    <div class="card accent"><h3>Perfect routing</h3><div class="num">97.0% <small>passed</small></div><p>$1.70: the cheapest model that gets each one right</p></div>
+<section class="slide" data-title="Show of hands">
+  <div class="kicker">First, a show of hands</div>
+  <h2>Who here…</h2>
+  <div class="poll">
+    <div><span>1</span>knows what <strong style="color:var(--accent)">Jev</strong> is?</div>
+    <div><span>2</span>knows what a <strong style="color:var(--accent)">classifier</strong> is?</div>
+    <div><span>3</span>knows what <strong style="color:var(--accent)">model routing</strong> is?</div>
+    <div><span>4</span>has an LLM bill they’d like to be smaller?</div>
   </div>
-  <p>A <strong>22×</strong> price gap, and the big model still isn’t the best answer. You want a router.</p>
-  <div class="foot"><span>168 held-out prompts, graded by code · Qwen 3.7 Flash / Plus / Max</span><span>2</span></div>
-  <aside class="notes">These numbers are from the eval we’ll get to. The small model fails a third of the prompts. The large model passes most of them at 22 times the price. And if you knew in advance which model each prompt needed, you’d beat the large model on accuracy at a sixth of its cost. That gap is what a router is for.</aside>
+  <div class="foot"><span>No wrong answers. This just tells me where to slow down.</span><span>2</span></div>
+  <aside class="notes">Ask each one, pause, look around. <b>Use the answers:</b> if few know Jev, spend longer on slide 6. If few know classifiers, say: a classifier takes some text and puts it in a bucket, like spam or not spam. If many know model routing, go fast through slides 4 and 5. Question 4 gets a laugh and tells you who cares about cost.</aside>
 </section>
 
 <!-- 3 -->
-<section class="slide" data-title="The obvious move">
-  <div class="kicker warn">The obvious move</div>
-  <h2>Ask an LLM: “Which model should I use?”</h2>
-  <pre><span class="c">// One typed question to Jev, a small model that answers with probabilities</span>
-model_choice: {
-  type: <span class="s">'choice'</span>,
-  instructions: <span class="s">'Which model should I use for this prompt?'</span>,
-  criteria: { Haiku: <span class="s">'Claude Haiku'</span>, Sonnet: <span class="s">'Claude Sonnet'</span>,
-              Opus: <span class="s">'Claude Opus'</span>, Fable: <span class="s">'Claude Fable'</span> }
-}
-
-<span class="c">// "How many months from 1953 through 1988 have a Friday the 13th?"</span>
-→ Opus <span class="w">0.46</span>   Sonnet 0.32   Haiku 0.18   Fable 0.04</pre>
-  <p>It works. It’s one line. Most of us ship this first.</p>
-  <div class="foot"><span>The anti-pattern</span><span>3</span></div>
-  <aside class="notes">Here’s the version I wrote first. One question, four options, take the top answer. It runs, it gives sensible-looking picks, and you can ship it in an afternoon. On this prompt, a long date-counting problem, it says Opus. Let’s look at why that’s a trap.</aside>
+<section class="slide" data-title="Today you build one">
+  <div class="kicker">Today</div>
+  <h2>You’ll build a model router on your own machine.</h2>
+  <div class="agent"><span class="lbl">Paste this into your coding agent (Claude Code, Codex, Cursor…)</span>Set up https://github.com/Rhys-Lindmark/model-router-workshop<br>and help me build my own model router. Follow its AGENTS.md.</div>
+  <div class="row">
+    <div class="card"><h3>What you’ll need</h3><p>Node 22 or newer. That’s it to start: no install, no keys.</p></div>
+    <div class="card"><h3>Later: two keys</h3><p>A <strong>Jev</strong> key (console.typesafe.ai) and an <strong>OpenRouter</strong> key (openrouter.ai/keys). We’ll do them together.</p></div>
+    <div class="card"><h3>Your own router page</h3><p><code>npm run app</code> opens your router at localhost:3401. You’ll fill it in, level by level.</p></div>
+  </div>
+  <div class="foot"><span>No agent? git clone the repo and run npm run app</span><span>3</span></div>
+  <aside class="notes">Get everyone started now, because cloning takes a minute and it can run while I talk. The agent reads AGENTS.md, which walks it through setup and tells it never to ask you to paste keys into chat. Nothing needs a key until Level 1’s hands-on part.</aside>
 </section>
 
 <!-- 4 -->
-<section class="slide" data-title="Why it's worse">
-  <div class="kicker warn">Why it’s worse</div>
-  <h2>You’ve asked the model to make your decision.</h2>
-  <ul>
-    <li><strong>Policy hides in the model.</strong> Cost, speed and quality trade-offs live in its weights, not in code you can read and test.</li>
-    <li><strong>The options are just labels.</strong> “Opus” describes nothing about the prompt. The answer depends on what the model happens to know about Opus.</li>
-    <li><strong>It fails the human test.</strong> Show a smart person only this question and they’d ask, “Do you care about cost or quality?”</li>
-    <li><strong>Nothing to change but the wording.</strong> No thresholds, no rows. New policy means a new prompt.</li>
-  </ul>
-  <div class="foot"><span>The anti-pattern</span><span>4</span></div>
-  <aside class="notes">Four problems. The one I’d underline is the human test: if a smart colleague couldn’t answer the question from the prompt alone without asking what you care about, the model can’t either. It just guesses, confidently.</aside>
+<section class="slide" data-title="The idea">
+  <div class="kicker">The idea</div>
+  <h2>Expensive but right, or cheap but wrong?</h2>
+  <div class="row">
+    <div class="card warn"><h3>Always the small model</h3><div class="num">65.5% <small>right</small></div><p>$0.51 per 1,000 prompts</p></div>
+    <div class="card"><h3>Always the large model</h3><div class="num">94.6% <small>right</small></div><p>$11.08 per 1,000 prompts: 22× the price</p></div>
+    <div class="card accent frag"><h3>Pick per prompt, perfectly</h3><div class="num">97.0% <small>right</small></div><p>$1.70: the cheapest model that gets each one right</p></div>
+  </div>
+  <p class="frag"><strong>A model router</strong> looks at each prompt and picks the cheapest model that will get it right. The hard part: you have to decide <em>before</em> you know the answer.</p>
+  <div class="foot"><span>168 graded prompts · Qwen 3.7 Flash, Plus, Max · from my eval, later</span><span>4</span></div>
+  <aside class="notes">Ask: “Which would you ship?” Most people say the big one. Click: if you could pick per prompt you’d be more accurate than the big model at a sixth of the price. Click: that’s model routing. The catch is you decide before you’ve seen an answer.</aside>
 </section>
 
 <!-- 5 -->
-<section class="slide" data-title="The pattern">
-  <div class="kicker">The pattern</div>
-  <h2>The model judges. Code decides.</h2>
-  <div class="flow">
-    <div class="box"><h3>Prompt</h3><p>“How many months from 1953 through 1988 have a Friday the 13th?”</p></div>
-    <div class="arrow">→</div>
-    <div class="box jev"><h3>Jev judges</h3><p>Small questions about the prompt, each answered with a probability.</p><p style="margin-top:8px"><code>exact_details 0.91</code><br><code>long_procedure 0.94</code></p></div>
-    <div class="arrow">→</div>
-    <div class="box"><h3>Code decides</h3><p>A truth table you can read, test and diff.</p><p style="margin-top:8px"><code>→ medium model, high effort</code></p></div>
+<section class="slide" data-title="Quiz">
+  <div class="kicker">Quick quiz</div>
+  <h2>Which of these does the small model get wrong?</h2>
+  <div class="quiz">
+    <div class="card"><p>What is the capital of Brazil?</p><span class="tag ok frag" data-step="1">right</span></div>
+    <div class="card"><p>What is 899 × 648?</p><span class="tag ok frag" data-step="1">right</span></div>
+    <div class="card"><p>What is 53606 × 73662?</p><span class="tag bad frag" data-step="1">wrong</span></div>
+    <div class="card"><p>Write a 6-line acrostic poem on GARDEN.</p><span class="tag ok frag" data-step="1">right</span></div>
+    <div class="card"><p>Write 40 words about a thunderstorm with no letter “e”.</p><span class="tag bad frag" data-step="1">wrong</span></div>
+    <div class="card"><p>What day of the week is 3,200 days after Nov 14, 1998?</p><span class="tag bad frag" data-step="1">wrong</span></div>
   </div>
-  <p>Ask for <strong>judgments a smart person could make from the prompt alone</strong>. Keep the decision where you can see it.</p>
-  <div class="foot"><span>Jev: typed questions in, calibrated probabilities out · docs.typesafe.ai</span><span>5</span></div>
-  <aside class="notes">Split the job. The model answers small factual questions about the prompt: does a right answer depend on exact digits? Does it need a long procedure? Those are judgments anyone could make from the prompt alone. Then a table in code turns the judgments into a model and an effort level. I’m using Jev from TypeSafe, which answers typed questions with probabilities, but the pattern works with any model that can give you calibrated yes/no answers.</aside>
+  <p class="frag" data-step="2">It’s not about sounding hard. It fails on <strong>exact digits and letters at scale</strong>, and <strong>long counting</strong>. Hold on to that.</p>
+  <div class="foot"><span>Qwen 3.7 Flash, low effort · one run each, from the eval</span><span>5</span></div>
+  <aside class="notes">Let people call out guesses for a few seconds. Most guess the poem and the no-“e” one. Click to reveal. The poem is fine; the big multiplication and the date arithmetic fail. Click: the pattern is exact work and long procedures. We’ll come back to this. It’s the whole story of the eval.</aside>
 </section>
 
 <!-- 6 -->
-<section class="slide" data-title="Judgments are typed questions">
-  <div class="kicker">Step 1 · Questions</div>
-  <h2>Judgments are typed questions.</h2>
-  <pre style="font-size:15.5px"><span class="c">// src/questions.js: one request, every question at once</span>
-reasoning_depth: { type: <span class="s">'score'</span>, instructions: <span class="s">'How much working out does a good answer to `prompt` take?'</span>,
-                   criteria: [<span class="s">'None…'</span>, <span class="s">'A few steps…'</span>, <span class="s">'A plan…'</span>, <span class="s">'Long, careful reasoning…'</span>] },
-expertise:       { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Does answering `prompt` well take specialist expertise?'</span> },
-high_stakes:     { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Could a wrong answer to `prompt` cause real harm or cost?'</span> },
-large_output:    { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Does `prompt` ask for a large piece of work?'</span> },
-nuanced_writing: { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Does `prompt` ask for writing where tone and style matter?'</span> }
-
-<span class="c">POST https://api.typesafe.ai/v1/systemone   { state: { prompt }, questions }</span>
-→ { reasoning_depth: { probabilities: { 0: .01, 1: .46, 2: .38, 3: .15 } }, expertise: { noul: .12 }, … }</pre>
-  <p>No model names, no prices. Just facts about the prompt.</p>
-  <div class="foot"><span>Router v1’s five questions · Noul = a yes/no question answered with a probability</span><span>6</span></div>
-  <aside class="notes">Router v1 asked five questions. A Score for how much reasoning the prompt takes, and four yes/no questions, which Jev calls Nouls. Notice none of them mentions a model or a price. They’re all about the prompt. One HTTP call asks all of them at once.</aside>
+<section class="slide" data-title="Meet Jev">
+  <div class="kicker">Meet Jev</div>
+  <h2>A judgment model, not a decision model.</h2>
+  <p>Jev is a classifier you program in English. You give it some text and a typed question. It gives back a <strong>calibrated probability</strong>: 0.9 means right about 9 times in 10.</p>
+  <div class="types">
+    <div class="card"><h3>Noul · yes or no</h3><p><code>"Does a correct answer depend on exact digits?"</code></p><p style="margin-top:8px">→ <strong>0.99</strong></p></div>
+    <div class="card"><h3>Score · a scale</h3><p><code>"How much working out does a good answer take?"</code></p><p style="margin-top:8px">→ none .01 · <strong>few .46</strong> · plan .38 · long .15</p></div>
+    <div class="card"><h3>Choice · one of N</h3><p><code>"Which model should I use?"</code></p><p style="margin-top:8px">→ Haiku .18 · Sonnet .32 · <strong>Opus .46</strong></p></div>
+  </div>
+  <p>Small and cheap: about 4 cents per thousand prompts. One request can ask many questions.</p>
+  <div class="foot"><span>Real answers from the eval · Jev by TypeSafe · $0.042 per million input tokens, output free</span><span>6</span></div>
+  <aside class="notes">Tie this back to the poll. A classifier puts text in buckets. Jev lets you write the buckets as questions. The key word is judgment: Jev is good at “what is this text like?” It is not meant to make your business decisions. Keep that distinction in mind, because the first router I wrote ignored it.</aside>
 </section>
 
 <!-- 7 -->
-<section class="slide" data-title="The truth table">
-  <div class="kicker">Step 2 · Code</div>
-  <h2>Policy is a file, not a prompt.</h2>
-  <pre><span class="c">// src/policy.js: ordered rows, first match wins, the last row always matches</span>
-<span class="k">export const</span> ROUTER_V1 = [
-  { test: j =&gt; j.large_output,               tier: <span class="s">'opus'</span> },
-  { test: j =&gt; j.depth === 3,                tier: <span class="s">'opus'</span> },
-  { test: j =&gt; j.expertise &amp;&amp; j.depth &gt;= 2,  tier: <span class="s">'opus'</span> },
-  { test: j =&gt; j.expertise &amp;&amp; j.high_stakes, tier: <span class="s">'opus'</span> },
-  { test: j =&gt; j.expertise,                  tier: <span class="s">'sonnet'</span> },
-  { test: j =&gt; j.depth === 2,                tier: <span class="s">'sonnet'</span> },
-  { test: j =&gt; j.nuanced_writing,            tier: <span class="s">'sonnet'</span> },
-  { test: j =&gt; j.high_stakes,                tier: <span class="s">'sonnet'</span> },
-<span class="hit">  { test: () =&gt; <span class="k">true</span>,                      tier: <span class="s">'haiku'</span> }  ← Friday the 13th</span>
-];</pre>
-  <p>Change routing by editing a row. Review it in a PR. Test it.</p>
-  <div class="foot"><span>Plus a 7-row table for effort · on the live page rows 1–2 pick Fable; the eval’s top tier is Opus</span><span>7</span></div>
-  <aside class="notes">And here’s the decision, in code. Rows in order, first match wins. You can read every reason a prompt went where it went. This looked very sensible to me when I wrote it. Expertise and stakes feel like the things that should cost more. Our Friday-the-13th prompt needs no expertise and has no stakes, so it falls all the way through to the small model. Hold that thought.</aside>
+<section class="slide" data-title="Level 1 · mine">
+  <div class="kicker"><span class="level">LEVEL 1 · I DO</span>Ask for the decision</div>
+  <h2>My first router: one question.</h2>
+  <div class="row" style="align-items:center">
+    <pre style="font-size:15px;flex:0.9">model_choice: {
+  type: <span class="s">'choice'</span>,
+  instructions:
+    <span class="s">'Which model should I use for this prompt?'</span>,
+  criteria: {
+    Haiku: <span class="s">'Claude Haiku'</span>, Sonnet: <span class="s">'Claude Sonnet'</span>,
+    Opus: <span class="s">'Claude Opus'</span>,   Fable: <span class="s">'Claude Fable'</span>
+  }
+}
+<span class="c">// route = the top answer</span></pre>
+    <img class="shot" src="img/live-choice.png" alt="The live Model Router page: the Choice picks Claude Sonnet at 0.72 for the Roth IRA prompt" style="flex:1.1">
+  </div>
+  <p class="big frag">Good question or bad question? Why?</p>
+  <div class="foot"><span>Live: “Compare a Roth IRA and a traditional 401(k) for someone earning $90k” → Sonnet</span><span>7</span></div>
+  <aside class="notes">This is the actual first version from my page. One Choice question, take the top answer. On the Roth IRA prompt it says Sonnet with 0.72. Click, then really ask the room: good or bad? Take two or three answers before moving on. Usual answers: “it’s simple” (true), “it doesn’t know the prices” (true), “how would it know what Opus is?” (exactly).</aside>
 </section>
 
 <!-- 8 -->
-<section class="slide" data-title="Demo">
-  <div class="kicker">Demo · npm run route</div>
-  <h2 style="font-size:36px">Every decision comes with its reasons.</h2>
-  <pre style="font-size:15px;line-height:1.45">$ npm run route -- "How many months from January 1953 through December 1988 have a Friday that falls on day 13?"
-
-<b style="color:var(--ink)">Jev judges</b>  <span class="c">jev-1.14.0 · one request, 10 questions</span>
-  score  How much working out does a good answer take?            <span class="n">none .01</span>  <b style="color:var(--ink)">few steps .46</b>  <span class="n">plan .38  long .15</span>
-  noul   Depends on getting exact letters, words or digits right?   0.91  <span class="y">yes</span>
-  noul   Answered by recalling one fact or one simple step?         0.09  <span class="n">no</span>
-  noul   Requires a long step-by-step procedure?                    0.94  <span class="y">yes</span>
-  noul   Takes specialist expertise?                                0.12  <span class="n">no</span>
-
-<b style="color:var(--ink)">Code decides</b>  <span class="c">Router v2 · first match wins</span>
-<span class="hit">    1  Exact details and a long procedure           sonnet:high  ← match</span>
-<span class="n">    2  Exact details, quick recall or no reasoning  haiku:high
-    …</span>
-<b style="color:var(--ink)">Route</b>   <span class="y">Qwen 3.7 Plus · high effort</span></pre>
-  <div class="row" style="gap:16px">
-    <div><span class="tag bad">Router v1 → small, low: failed</span></div>
-    <div><span class="tag">“Which model?” → large: passed, 4.8× cost</span></div>
-    <div><span class="tag ok">Router v2 → medium, high: passed, $0.013</span></div>
-  </div>
-  <div class="foot"><span>Live: npm run route -- "…" · Offline: npm run route -- --offline calendar-15</span><span>8</span></div>
-  <aside class="notes"><b>Live demo:</b> run <b>npm run route -- --offline calendar-15</b> (no key, no Wi-Fi), or a live prompt with a key. Point at the two yes answers, then the matched row. Then the three outcomes underneath: the first router sent this to the small model, which got it wrong. Asking “which model?” picked the large model, which got it right at almost five times the price. The version you’re looking at is Router v2, which came out of the eval. Let’s see how we got there.</aside>
+<section class="slide" data-title="Level 1 · good or bad">
+  <div class="kicker"><span class="level">LEVEL 1 · I DO</span>Good or bad?</div>
+  <h2>It works. It’s also a decision dressed up as a question.</h2>
+  <ul>
+    <li class="frag"><strong>Good:</strong> one call, one line, and it gives sensible-looking picks.</li>
+    <li class="frag"><strong>The options are just labels.</strong> “Opus” says nothing about the prompt. The answer depends on what Jev happens to know about Opus.</li>
+    <li class="frag"><strong>Your policy hides in the model.</strong> Cost vs quality is your call. Here it lives in Jev’s weights, not in code you can read.</li>
+    <li class="frag"><strong>It fails the human test.</strong> Ask a smart colleague this question and they’d say, “Do you care about cost or quality?”</li>
+    <li class="frag"><strong>Nothing to change but the wording.</strong> No rows, no thresholds, no “why”.</li>
+  </ul>
+  <div class="foot"><span>The human test: could a smart person answer it from the prompt alone?</span><span>8</span></div>
+  <aside class="notes">Reveal one at a time, ideally after someone in the room has said it. The human test is the one to repeat: if a smart person couldn’t answer the question from the prompt alone, without asking what you care about, Jev can’t either. It just guesses confidently. We’ll see in the eval how much that costs.</aside>
 </section>
 
 <!-- 9 -->
-<section class="slide" data-title="Build the eval first">
-  <div class="kicker">Does it work?</div>
-  <h2>Run every model on every prompt. Grade by code.</h2>
-  <div class="row">
-    <div class="card"><div class="num">228</div><p>prompts in math, code, writing, logic and facts. Every answer checked by code: computed answers, hidden tests, “exactly 12 words”. No LLM judge.</p></div>
-    <div class="card"><div class="num">6</div><p>options per prompt: three sizes of one model family × low and high reasoning effort. So any policy can be scored on the same runs.</p></div>
-    <div class="card"><div class="num">60 / 168</div><p>train / held-out. Router v2 was built from the 60. Every score you’ll see is on the 168.</p></div>
+<section class="slide" data-title="Connect your keys">
+  <div class="kicker"><span class="level you">YOU DO</span>Connect your keys</div>
+  <h2>Two keys, then your router can call real models.</h2>
+  <div class="steps">
+    <div><span><strong>Jev:</strong> create a key at <code>console.typesafe.ai/keys</code></span></div>
+    <div><span><strong>OpenRouter:</strong> create a key at <code>openrouter.ai/keys</code> (add a few dollars, set a limit)</span></div>
+    <div><span><code>cp .env.example .env</code>, then paste both keys into <code>.env</code> <strong>in your editor</strong>, not into chat</span></div>
+    <div><span><code>npm run doctor -- --live</code> → two ✓ lines</span></div>
   </div>
-  <p>Score each router next to <strong>fixed choices</strong>, <strong>perfect routing</strong> and <strong>random routing</strong> with the same mix of picks. Total cost: <strong>$15</strong>.</p>
-  <div class="foot"><span>Method: TypeSafe’s SDE cascade cookbook + Baseten’s router write-up</span><span>9</span></div>
-  <aside class="notes">The eval is the part I’d want you to steal. Run every option on every prompt once, grade it by code, and then scoring any routing policy is a lookup: free and instant. That’s why the repo can score your router in under a second with no keys. The random baseline matters: deal the same mix of models to prompts at random ten thousand times. If your router can’t beat that, it isn’t routing, it’s just a price mix.</aside>
+  <pre style="font-size:17px"><span class="c"># Every Jev call is one POST. This is what your router sends:</span>
+curl https://api.typesafe.ai/v1/systemone -H <span class="s">"Authorization: Bearer $TYPESAFE_API_KEY"</span> \
+  -d <span class="s">'{"model":"jev-1.14.0","state":{"prompt":"…"},"questions":{"model_choice":{…}}}'</span></pre>
+  <div class="foot"><span>docs/KEYS.md · No key yet? Every step works on the eval’s saved answers.</span><span>9</span></div>
+  <aside class="notes">Give people two minutes. Walk the room. The two common problems: a key pasted with quotes or a trailing space, and people pasting keys into their agent’s chat. Tell them not to. Anyone without a Jev key yet can still do everything on the eval prompts, because Jev’s answers are saved.</aside>
 </section>
 
 <!-- 10 -->
-<section class="slide" data-title="Results">
-  <div class="kicker">Results · 168 held-out prompts</div>
-  <h2 style="font-size:40px">Judgments beat the decision.</h2>
-  <svg class="chart" viewBox="0 0 1120 470" width="1120" height="470" role="img" aria-label="Pass rate against cost per 1,000 prompts for each routing policy">
-    <!-- plot area: x 70..1090 (log $0.4..$14), y 20..420 (60%..100%) -->
-    <g id="chart-grid"></g>
-    <g id="chart-points"></g>
-  </svg>
-  <div class="foot"><span>Up and to the left is better · cost on a log scale · hover a point for its numbers</span><span>10</span></div>
-  <aside class="notes">Up and to the left is better. Gray dots are “always use this one option”. Orange is asking “which model should I use?”: 85.7% at $7.37. Blue are the routers built from judgments. Router v2, a readable table: 91.1% at $3.20. Five points more accurate and less than half the price. Router v3 feeds the same judgments into a small learned model and gets 93.5%. Router v1, the table I showed you, is down at 80%. So the first table was wrong. Here’s how the eval told us why.</aside>
+<section class="slide" data-title="Level 1 · you">
+  <div class="kicker"><span class="level you">LEVEL 1 · YOU DO</span>Run the Choice router</div>
+  <h2>Run mine, then make it yours.</h2>
+  <div class="steps">
+    <div><span><code>npm run app</code> → open <code>localhost:3401</code> → <strong>Level 1</strong></span></div>
+    <div><span>Click the six quiz prompts. Does “which model?” pick the right size for each? The app shows how every model did.</span></div>
+    <div><span>Type your own prompt (with a Jev key), then <strong>Answer with</strong> the picked model (with an OpenRouter key).</span></div>
+    <div><span>Open <code>starter/choice.js</code>. Can you write a better Choice? Describe each option instead of naming it.</span></div>
+  </div>
+  <p class="muted">Then <code>npm run ask</code> asks your version about all 168 eval prompts, and the Level 3 tab scores it.</p>
+  <div class="foot"><span>starter/choice.js · app tab: Level 1</span><span>10</span></div>
+  <aside class="notes">In a 15-minute slot, give this one minute and move on; people finish later. In a longer workshop, give it five. The interesting result: describing the options (“small, fast, cheap; fails on exact arithmetic”) helps a bit, but you’re still asking Jev to make your decision.</aside>
 </section>
 
 <!-- 11 -->
-<section class="slide" data-title="Where v1 went wrong">
-  <div class="kicker">What the eval taught us</div>
-  <h2 style="font-size:38px">Models didn’t fail on expertise or stakes.<br>They failed on exact details and long procedures.</h2>
-  <div class="row">
-    <div class="card warn"><h3>Router v1’s 28 “too weak” picks</h3><p>Calendar prompts counting days across years. Letter counts. “Write 40 words without the letter e”. Exact multiplication. Short functions.</p><p style="margin-top:10px">None needs expertise. All look shallow. A small model gets them wrong.</p></div>
-    <div class="card accent"><h3>So Router v2 asks four new questions</h3><pre style="font-size:16px;padding:14px 16px;margin-top:6px">exact_details   Does a correct answer depend on
-                exact letters, words or digits?
-long_procedure  Does it need a long procedure,
-                step by step?
-quick_recall    One well-known fact or one step?
-writes_code     Does it ask for code?</pre></div>
+<section class="slide" data-title="Level 2 · mine">
+  <div class="kicker"><span class="level">LEVEL 2 · I DO</span>Judgments + a table</div>
+  <h2>Ask what a smart person could judge. Decide in code.</h2>
+  <div class="flow">
+    <div class="box"><h3>Prompt</h3><p>“Compare a Roth IRA and a traditional 401(k) for someone earning $90k”</p></div>
+    <div class="arrow">→</div>
+    <div class="box jev"><h3>Jev judges</h3><p>How much working out? Specialist expertise? High stakes? Large output? Nuanced writing?</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>Code decides</h3><p>A truth table: ordered rows, first match wins. You can read it, test it, diff it.</p></div>
   </div>
-  <p>Written from the 60 training prompts only. The fix was <strong>better questions</strong>, not better thresholds: the best re-tune of v1’s thresholds reached 87.5%, at $5.62.</p>
-  <div class="foot"><span>v1 verdicts: right 69 · more than needed 66 · too weak 28 · nothing passes 5</span><span>11</span></div>
-  <aside class="notes">Comparing each v1 pick with the cheapest option that passed showed a clear pattern. Its misses weren’t expert questions. They were prompts where one wrong letter or digit makes the answer wrong, and long procedures like counting dates across decades. My questions about expertise and stakes couldn’t see that. So v2 asks about it directly. Notice what didn’t work: twiddling v1’s thresholds. When the questions are wrong, no table fixes them.</aside>
+  <pre style="font-size:15.5px"><span class="c">// my first five judgments: src/questions.js</span>
+reasoning_depth: { type: <span class="s">'score'</span>, instructions: <span class="s">'How much working out does a good answer to `prompt` take?'</span> },
+expertise:       { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Does answering `prompt` well take specialist expertise?'</span> },
+high_stakes:     { type: <span class="s">'noul'</span>,  instructions: <span class="s">'Could a wrong answer to `prompt` cause real harm or cost?'</span> }, <span class="c">…</span></pre>
+  <p class="frag">Do these pass the human test? <span class="muted">(Yes: you can answer each from the prompt alone.)</span></p>
+  <div class="foot"><span>No model names, no prices: just facts about the prompt</span><span>11</span></div>
+  <aside class="notes">Decomposition is the skill. Instead of “which model?”, ask the questions you’d ask yourself before deciding. None of them mentions a model or a price. Then code turns them into a decision. Click: ask whether they pass the human test. They do. Next slide: what it did with the Roth IRA prompt.</aside>
 </section>
 
 <!-- 12 -->
-<section class="slide" data-title="Router v2">
-  <div class="kicker">Router v2</div>
-  <h2>The table, built from the eval.</h2>
-  <pre style="font-size:17px;line-height:1.42"><span class="c">// src/policy.js · first match wins · yes means probability ≥ 0.5</span>
-<span class="k">export const</span> ROUTER_V2 = [
-  { when: <span class="s">'Exact details and a long procedure'</span>,          option: <span class="s">'sonnet:high'</span> },
-  { when: <span class="s">'Exact details, quick recall or no reasoning'</span>, option: <span class="s">'haiku:high'</span> },
-  { when: <span class="s">'Exact letters, words or digits'</span>,              option: <span class="s">'sonnet:high'</span> },
-  { when: <span class="s">'Long step-by-step procedure'</span>,                 option: <span class="s">'sonnet:high'</span> },
-  { when: <span class="s">'Large piece of work'</span>,                         option: <span class="s">'opus:low'</span> },
-  { when: <span class="s">'Writes code'</span>,                                 option: <span class="s">'haiku:high'</span> },
-  { when: <span class="s">'Quick recall'</span>,                                option: <span class="s">'haiku:low'</span> },
-  { when: <span class="s">'Otherwise'</span>,                                   option: <span class="s">'sonnet:low'</span> }
-];</pre>
-  <div class="row">
-    <div class="card accent" style="padding:14px 20px"><h3>Router v2</h3><div class="num" style="font-size:38px">91.1% <small>$3.20 / 1k</small></div></div>
-    <div class="card warn" style="padding:14px 20px"><h3>“Which model should I use?”</h3><div class="num" style="font-size:38px">85.7% <small>$7.37 / 1k</small></div></div>
+<section class="slide" data-title="Level 2 · trace">
+  <div class="kicker"><span class="level">LEVEL 2 · I DO</span>What it did</div>
+  <div class="row" style="align-items:flex-start;gap:28px">
+    <img class="shot" src="img/live-v1.jpg" alt="Router v1 on the live page: Claude Opus at high reasoning for the Roth IRA prompt, via the row Expertise and depth is plan" style="flex:1.25">
+    <div style="display:grid;gap:18px">
+      <h2 style="font-size:36px">Roth IRA vs 401(k) → Opus, high effort.</h2>
+      <p>Expertise was 0.40: “unsure”, which I told the code to treat as yes. Plus a plan-sized answer. Row 3 matched.</p>
+      <p class="frag big">Right call? <span class="muted">How would you know?</span></p>
+    </div>
   </div>
-  <div class="foot"><span>The eval imports this same file, so the eval scores exactly what ships</span><span>12</span></div>
-  <aside class="notes">Eight rows. Effort goes where exact work is, and gets saved everywhere else. Small model for code and quick lookups, which the eval said was enough. One detail that matters more than it looks: the page and the eval import the same policy file. If the eval scored a copy, you’d never know when the two drifted.</aside>
+  <div class="foot"><span>ai.rhyslindmark.com/jev/model-router · Router v1</span><span>12</span></div>
+  <aside class="notes">Here’s the trace from my page. Every judgment, every row, and you can see exactly why it went to Opus: expertise came back 0.40, my code reads anything between 0.3 and 0.7 as unsure and counts unsure as yes. That’s a policy choice I made, and I can see it and change it. Click: is it the right call? Honestly, you can’t tell from one prompt. That’s Level 3.</aside>
 </section>
 
 <!-- 13 -->
-<section class="slide" data-title="The honest part">
-  <div class="kicker">The honest part</div>
-  <h2>On this set, one fixed choice ties the best router.</h2>
-  <table class="t">
-    <tr><th>Policy</th><th class="r">Passed</th><th class="r">$ / 1k prompts</th></tr>
-    <tr><td>Always the large model, high effort</td><td class="r">94.6%</td><td class="r">$11.08</td></tr>
-    <tr class="me"><td>Router v3: judgments + a small learned model</td><td class="r">93.5%</td><td class="r">$3.25</td></tr>
-    <tr><td>Always the medium model, high effort</td><td class="r">93.5%</td><td class="r">$3.32</td></tr>
-    <tr class="me"><td>Router v2: judgments + table</td><td class="r">91.1%</td><td class="r">$3.20</td></tr>
-    <tr class="bad"><td>“Which model should I use?”</td><td class="r">85.7%</td><td class="r">$7.37</td></tr>
-  </table>
-  <p>Router v3 sends 128 of 168 prompts to the medium model. Most of the saving is against the top model, not against the right fixed choice. A router earns its keep when <strong>you don’t know the right fixed choice in advance</strong>, or when your traffic mix changes.</p>
-  <div class="foot"><span>Limits: one run per prompt · open stand-in models · graded puzzles, not real traffic</span><span>13</span></div>
-  <aside class="notes">I want to be straight about this. On these prompts, always using the medium model at high effort scores the same as the best router. You only know that because you ran the eval. That’s the real lesson: the eval told me which fixed choice was right, and a router is how you keep making that call when the prompts change. If you take one thing from this, run every option on your own traffic before you build anything clever.</aside>
+<section class="slide" data-title="Level 2 · you">
+  <div class="kicker"><span class="level you">LEVEL 2 · YOU DO</span>Write your judgments and table</div>
+  <h2>Decompose the decision.</h2>
+  <div class="steps">
+    <div><span>In the app, <strong>Level 2</strong>: click prompts and watch each judgment and the row that matched.</span></div>
+    <div><span>Edit <code>starter/policy.js</code>. Your table can use my nine judgments already (<code>j.exact_details</code>, <code>j.quick_recall</code>, …).</span></div>
+    <div><span>Write a judgment of your own in <code>starter/questions.js</code>. It must pass the human test.</span></div>
+    <div><span>Refresh the app. Your question shows up in the trace, marked “yours”.</span></div>
+  </div>
+  <pre style="font-size:18px">{ when: <span class="s">'Exact letters, words or digits'</span>, test: j =&gt; j.exact_details, option: <span class="s">'sonnet:high'</span> },</pre>
+  <div class="foot"><span>starter/policy.js · starter/questions.js · app tab: Level 2</span><span>13</span></div>
+  <aside class="notes">Remind them of the quiz: what made the small model fail? That’s a judgment worth asking. One sentence per row. If a row needs a paragraph to justify it, it’s probably overfitting.</aside>
 </section>
 
 <!-- 14 -->
-<section class="slide" data-title="Your turn">
-  <div class="kicker">Your turn</div>
-  <h2>Write a router that beats mine.</h2>
-  <pre style="font-size:18px">git clone https://github.com/Rhys-Lindmark/model-router-workshop
-cd model-router-workshop
-npm run score                                <span class="c"># every policy, offline, no keys</span>
-<span class="c"># edit starter/policy.js, then:</span>
-npm run score -- --policy starter --misses   <span class="c"># your score + what it got wrong</span></pre>
+<section class="slide" data-title="Level 3 · my eval">
+  <div class="kicker"><span class="level">LEVEL 3 · I DO</span>Check it with an eval</div>
+  <h2>Run every model on every prompt. Grade by code.</h2>
   <div class="row">
-    <div class="card" style="padding:16px 20px"><h3>Bronze · match “Which model?”</h3><p><strong>≥ 85.7% for ≤ $7.37</strong></p></div>
-    <div class="card" style="padding:16px 20px"><h3>Silver · beat Router v2</h3><p><strong>&gt; 91.1% for ≤ $3.32</strong></p></div>
-    <div class="card accent" style="padding:16px 20px"><h3>Gold · match the best fixed choice</h3><p><strong>≥ 93.5% for &lt; $3.32</strong></p></div>
+    <div class="card"><div class="num">228</div><p>prompts: math, code, writing, logic, facts. Every answer checked by code. No LLM judge.</p></div>
+    <div class="card"><div class="num">6</div><p>options per prompt: three model sizes × low and high effort. Now any router is a lookup.</p></div>
+    <div class="card"><div class="num">60 / 168</div><p>train / test. Build from the 60. Score only on the 168.</p></div>
   </div>
-  <p class="muted" style="font-size:22px">Each needs to beat random routing too. Hint: Gold takes three rows. Bonus: add your own question to Jev with <code>npm run ask</code>.</p>
-  <div class="foot"><span>docs/WORKSHOP.md has the steps and checkpoints</span><span>14</span></div>
-  <aside class="notes">Your turn. Clone, run npm run score, and you’ll see the whole results table in under a second. Then open starter/policy.js. It starts as one row, “always the medium model, low effort”, which scores 89.3% but doesn’t beat random, because it isn’t routing at all. Add rows. Gold is possible with three rows you can explain in a sentence each. Fair warning: you can see the test set, so you can overfit. A row you can explain beats an extra point.</aside>
+  <p>Compare every router to <strong>fixed choices</strong>, <strong>perfect routing</strong> and <strong>random routing</strong> with the same mix of picks. Cost of the whole run: <strong>$15</strong>.</p>
+  <div class="foot"><span>Without baselines, every router looks good</span><span>14</span></div>
+  <aside class="notes">This is how you answer “was Opus the right call?”. Run every option on every prompt once, grade by code, and then any routing policy can be scored for free by lookup. The random baseline deals the same picks to prompts at random 10,000 times. If your router can’t beat that, it isn’t routing; it’s a price mix.</aside>
 </section>
 
 <!-- 15 -->
-<section class="slide" data-title="Takeaways">
-  <div class="kicker">Takeaways</div>
-  <h2>Three things to steal.</h2>
-  <ul style="gap:22px">
-    <li><strong>Ask for judgments, not decisions.</strong> Questions a smart person could answer from the prompt alone. Keep cost and quality trade-offs in code.</li>
-    <li><strong>Put policy in a file the eval imports.</strong> Then the eval scores exactly what ships, and a routing change is a diff.</li>
-    <li><strong>Score against fixed, perfect and random.</strong> Without them, any router looks good. With them, you might find you don’t need one.</li>
-  </ul>
-  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">
+<section class="slide" data-title="Results">
+  <div class="kicker"><span class="level">LEVEL 3 · I DO</span>Results · 168 test prompts</div>
+  <h2 style="font-size:40px">Judgments beat asking for the decision.</h2>
+  <svg class="chart" viewBox="0 0 1120 450" width="1120" height="450" role="img" aria-label="Pass rate against cost per 1,000 prompts for each routing policy">
+    <g id="chart-grid"></g><g id="chart-points"></g>
+  </svg>
+  <div class="foot"><span>Up and to the left is better · log cost · hover a point</span><span>15</span></div>
+  <aside class="notes">Gray: one fixed option for everything. Orange: Level 1, “which model?”: 85.7% at $7.37. It sends a quarter of prompts to the most expensive model whether they need it or not. Blue: Level 2 routers. My first table, v1, is down at 80%. Worse than Level 1! So judgments alone aren’t enough: they have to be the right judgments. v2 is 91.1% at $3.20. Here’s what changed.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-title="What the eval taught">
+  <div class="kicker"><span class="level">LEVEL 3 · I DO</span>What the eval taught me</div>
+  <h2 style="font-size:40px">My questions asked about expertise and stakes. The failures were exact details and long procedures.</h2>
+  <div class="row" style="align-items:flex-start">
+    <div style="flex:0.85;display:grid;gap:14px">
+      <p>Remember the quiz? So Router v2 asks four new questions:</p>
+      <pre style="font-size:14.5px">exact_details   exact letters, words or digits?
+long_procedure  a long step-by-step procedure?
+quick_recall    one well-known fact or step?
+writes_code     asks for code?</pre>
+      <p><strong>91.1%</strong> at $3.20, vs “which model?” at 85.7% for $7.37. And the Roth IRA prompt goes to Sonnet, low effort.</p>
+    </div>
+    <img class="shot" src="img/live-v2.jpg" alt="Router v2 on the live page: Claude Sonnet at low effort for the Roth IRA prompt, via the Otherwise row" style="flex:1.15">
+  </div>
+  <div class="foot"><span>Written from the 60 training prompts only · the best re-tune of v1’s thresholds reached 87.5%</span><span>16</span></div>
+  <aside class="notes">The fix was better questions, not better thresholds. When I tried re-tuning v1, the best I got was 87.5% at much higher cost. And one honest note: on this prompt set, always using the medium model at high effort scores 93.5% at $3.32, as good as my best router. You only learn that by running the eval. A router earns its keep when you don’t know the right fixed choice in advance, or when your traffic changes.</aside>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="Level 3 · you">
+  <div class="kicker"><span class="level you">LEVEL 3 · YOU DO</span>Score yours, then build your own eval</div>
+  <div class="row" style="gap:28px">
+    <div style="display:grid;gap:14px;align-content:start">
+      <h2 style="font-size:38px">Score your table on my eval.</h2>
+      <p>App tab <strong>Level 3</strong>, or <code>npm run score -- --policy starter --misses</code>. The misses list is your next question.</p>
+      <div class="row" style="gap:10px">
+        <div class="card" style="padding:12px 14px"><h3>Bronze</h3><p style="font-size:18px">≥ 85.7% for ≤ $7.37</p></div>
+        <div class="card" style="padding:12px 14px"><h3>Silver</h3><p style="font-size:18px">&gt; 91.1% for ≤ $3.32</p></div>
+        <div class="card accent" style="padding:12px 14px"><h3>Gold</h3><p style="font-size:18px">≥ 93.5% for &lt; $3.32</p></div>
+      </div>
+      <p class="muted" style="font-size:20px">Each must also beat random. Gold takes three rows.</p>
+    </div>
+    <div style="display:grid;gap:14px;align-content:start">
+      <h2 style="font-size:38px">Then make your own.</h2>
+      <pre style="font-size:15.5px"><span class="c">// starter/my-eval.js: prompts from YOUR project</span>
+{ prompt: <span class="s">'What is 53606 × 73662?…'</span>,
+  check: number(<span class="y">3948725172</span>) },
+{ prompt: <span class="s">'Write 40 words… no letter "e"'</span>,
+  check: all(without(<span class="s">'e'</span>), atLeastWords(<span class="y">40</span>)) },</pre>
+      <p><code>npm run my-eval</code> runs all six options, grades every reply, and scores your routers on <em>your</em> prompts. Capped at $1.</p>
+    </div>
+  </div>
+  <div class="foot"><span>starter/my-eval.js · npm run my-eval · app tab: Level 3</span><span>17</span></div>
+  <aside class="notes">Two halves. Left: everyone can score their table right now against my eval, offline. Right: the real skill. Put ten prompts from your own product in my-eval.js, each with a check, and run every option on them. Ten real prompts beat a hundred generic ones. Read the failed replies before you trust a check.</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide" data-title="Recap">
+  <div class="kicker">What you built</div>
+  <h2>Four levels of a model router.</h2>
+  <div class="ladder">
+    <div class="card"><div class="lv">LEVEL 1</div><h3>Ask for the decision</h3><p>One Choice. Easy, opaque, 85.7% at $7.37.</p></div>
+    <div class="card"><div class="lv">LEVEL 2</div><h3>Judgments + a table</h3><p>Questions a smart person could answer. Decisions in code you can read.</p></div>
+    <div class="card"><div class="lv">LEVEL 3</div><h3>Check it with an eval</h3><p>Every option on every prompt, graded by code. Fixed, perfect and random baselines.</p></div>
+    <div class="card accent"><div class="lv">NEXT</div><h3>Better questions</h3><p>Let the misses tell you what to ask. That’s how v2 got to 91.1% at $3.20.</p></div>
+  </div>
+  <p><code>npm run chat</code> is your finished router: Jev judges, your table decides, the picked model answers.</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap">
     <span class="repo" style="font-size:18px">github.com/Rhys-Lindmark/model-router-workshop</span>
     <span class="repo" style="font-size:18px">ai.rhyslindmark.com/jev/model-router</span>
   </div>
-  <div class="foot"><span>Rhys Lindmark · Jev docs: docs.typesafe.ai</span><span>15</span></div>
-  <aside class="notes">Three things. Ask the model for judgments, not the decision. Put the decision in a file that your eval imports. And always score against fixed choices, perfect routing and random routing. The live page has the interactive version of everything you saw. Thanks.</aside>
+  <div class="foot"><span>Rhys Lindmark · Jev docs: docs.typesafe.ai</span><span>18</span></div>
+  <aside class="notes">Recap the ladder. The skills you levelled up: wiring an API and keys, decomposing a decision into judgments, and checking with an eval. Everything you need to keep going is in the repo, including AGENTS.md so your agent can help. Thanks!</aside>
 </section>
 
 </div>
 
 <div class="progress" id="progress"></div>
 <div class="notes-panel" id="notes-panel"></div>
-<div class="hint" id="hint">← → move · N notes · P presenter · F fullscreen</div>
+<div class="hint" id="hint">→ next / reveal · N notes · P presenter · F fullscreen</div>
 <div class="presenter-view" id="pv">
   <div class="pv-head"><span id="pv-count"></span><span class="pv-timer" id="pv-timer">0:00</span><span><button id="pv-reset" style="font:inherit;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer">Reset timer</button></span></div>
   <div><div class="pv-label">Now</div><div class="pv-frame" id="pv-now"></div></div>
@@ -381,14 +427,14 @@ const POINTS = [
   { name: 'Always medium · high', cost: 3.32, pass: 93.5, kind: 'fixed', dx: 10, dy: -16 },
   { name: 'Always large · low', cost: 9.04, pass: 91.1, kind: 'fixed', anchor: 'end', dx: -12, dy: 20 },
   { name: 'Always large · high', cost: 11.08, pass: 94.6, kind: 'fixed', anchor: 'end', dx: -12, dy: 22 },
-  { name: 'Router v1', cost: 2.76, pass: 80.4, kind: 'router' },
-  { name: 'Router v2', cost: 3.20, pass: 91.1, kind: 'router', strong: true, anchor: 'end', dx: -14, dy: 2 },
-  { name: 'Router v3', cost: 3.25, pass: 93.5, kind: 'router', strong: true, anchor: 'end', dx: -14, dy: -12 },
-  { name: '“Which model should I use?”', cost: 7.37, pass: 85.7, kind: 'anti', strong: true, anchor: 'end', dx: -14 },
+  { name: 'Level 2 · Router v1', cost: 2.76, pass: 80.4, kind: 'router', strong: true },
+  { name: 'Level 2 · Router v2', cost: 3.20, pass: 91.1, kind: 'router', strong: true, anchor: 'end', dx: -14, dy: 2 },
+  { name: 'Router v3', cost: 3.25, pass: 93.5, kind: 'router', anchor: 'end', dx: -14, dy: -12 },
+  { name: 'Level 1 · “Which model?”', cost: 7.37, pass: 85.7, kind: 'anti', strong: true, anchor: 'end', dx: -14 },
   { name: 'Perfect routing', cost: 1.70, pass: 97.0, kind: 'perfect', anchor: 'end', dx: -14 }
 ];
 (function drawChart() {
-  const NS = 'http://www.w3.org/2000/svg', X0 = 70, X1 = 1090, Y0 = 420, Y1 = 20;
+  const NS = 'http://www.w3.org/2000/svg', X0 = 70, X1 = 1090, Y0 = 400, Y1 = 20;
   const lx = c => X0 + (Math.log(c) - Math.log(0.4)) / (Math.log(14) - Math.log(0.4)) * (X1 - X0);
   const ly = p => Y0 - (p - 60) / 40 * (Y0 - Y1);
   const el = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
@@ -408,51 +454,55 @@ const POINTS = [
   }
 })();
 
-// ---- Deck navigation -----------------------------------------------------------
+// ---- Deck navigation with click-to-reveal ----------------------------------------
 const slides = [...document.querySelectorAll('#deck .slide')];
 const presenter = new URLSearchParams(location.search).has('presenter');
-const chan = 'BroadcastChannel' in window ? new BroadcastChannel('model-router-deck') : null;
-let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+const chan = 'BroadcastChannel' in window ? new BroadcastChannel('model-router-deck-v2') : null;
+// Reveal steps per slide: elements with .frag, grouped by data-step (default: document order).
+const stepsOf = s => { const f = [...s.querySelectorAll('.frag')]; let auto = 0; return f.map(e => ({ e, step: Number(e.dataset.step) || ++auto + (f.some(x => x.dataset.step) ? 100 : 0) })); };
+const maxStep = s => { const st = stepsOf(s).map(x => x.step); return [...new Set(st)].length; };
+let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1)), step = 0;
 let notesOn = false;
-function fit() {
-  const s = Math.min(innerWidth / 1280, innerHeight / 720);
-  for (const el of slides) el.style.transform = `scale(${s})`;
-}
-function show(n, fromRemote) {
-  i = Math.max(0, Math.min(slides.length - 1, n));
+function applySteps(s, n) { const groups = [...new Set(stepsOf(s).map(x => x.step))].sort((a, b) => a - b); stepsOf(s).forEach(x => x.e.classList.toggle('shown', groups.indexOf(x.step) < n)); }
+function fit() { const k = Math.min(innerWidth / 1280, innerHeight / 720); for (const el of slides) el.style.transform = `scale(${k})`; }
+function show(n, st = 0, fromRemote) {
+  i = Math.max(0, Math.min(slides.length - 1, n)); step = Math.max(0, Math.min(maxStep(slides[i]), st));
   slides.forEach((s, k) => s.classList.toggle('on', k === i));
+  applySteps(slides[i], step);
   document.getElementById('progress').style.width = `${(i + 1) / slides.length * 100}%`;
   history.replaceState(null, '', `${location.search}#${i + 1}`);
   const notes = slides[i].querySelector('.notes');
   document.getElementById('notes-panel').innerHTML = `<b>${i + 1}. ${slides[i].dataset.title}</b> · ${notes ? notes.innerHTML : ''}`;
   if (presenter) renderPresenter();
-  if (!fromRemote && chan) chan.postMessage({ slide: i });
+  if (!fromRemote && chan) chan.postMessage({ slide: i, step });
 }
+const next = () => step < maxStep(slides[i]) ? show(i, step + 1) : i < slides.length - 1 && show(i + 1, 0);
+const prev = () => step > 0 ? show(i, step - 1) : i > 0 && show(i - 1, maxStep(slides[i - 1]));
 function renderPresenter() {
-  const put = (id, k) => {
+  const put = (id, k, st) => {
     const box = document.getElementById(id); box.innerHTML = '';
     if (k >= slides.length) { box.innerHTML = '<p style="padding:20px">End</p>'; return; }
-    const c = slides[k].cloneNode(true); c.classList.add('on'); box.append(c);
+    const c = slides[k].cloneNode(true); c.classList.add('on'); applySteps(c, st); box.append(c);
     requestAnimationFrame(() => { c.style.transform = `scale(${box.clientWidth / 1280})`; });
   };
-  put('pv-now', i); put('pv-next', i + 1);
-  document.getElementById('pv-count').textContent = `Slide ${i + 1} of ${slides.length} · ${slides[i].dataset.title}`;
+  put('pv-now', i, step); put('pv-next', i + 1, 0);
+  const left = maxStep(slides[i]) - step;
+  document.getElementById('pv-count').textContent = `Slide ${i + 1} of ${slides.length} · ${slides[i].dataset.title}${left ? ` · ${left} reveal${left > 1 ? 's' : ''} left` : ''}`;
   const n = slides[i].querySelector('.notes'); document.getElementById('pv-notes').innerHTML = n ? n.innerHTML : '';
 }
-if (chan) chan.onmessage = e => show(e.data.slide, true);
+if (chan) chan.onmessage = e => show(e.data.slide, e.data.step, true);
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
-  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); show(i + 1); }
-  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); show(i - 1); }
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); next(); }
+  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); prev(); }
   else if (k === 'Home') show(0);
-  else if (k === 'End') show(slides.length - 1);
+  else if (k === 'End') show(slides.length - 1, 99);
   else if (k === 'n' || k === 'N') { notesOn = !notesOn; document.getElementById('notes-panel').classList.toggle('on', notesOn); }
   else if (k === 'f' || k === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
   else if (k === 'p' || k === 'P') { if (!presenter) window.open(`${location.pathname}?presenter#${i + 1}`, 'presenter', 'width=1200,height=800'); }
 });
-document.getElementById('deck').addEventListener('click', e => { if (e.target.closest('a,button,svg')) return; show(i + (e.clientX < innerWidth / 3 ? -1 : 1)); });
-// Timer (presenter view)
+document.getElementById('deck').addEventListener('click', e => { if (e.target.closest('a,button,svg')) return; e.clientX < innerWidth / 3 ? prev() : next(); });
 let t0 = Date.now();
 document.getElementById('pv-reset').onclick = () => { t0 = Date.now(); };
 if (presenter) {
@@ -461,7 +511,7 @@ if (presenter) {
   addEventListener('resize', renderPresenter);
 }
 addEventListener('resize', fit);
-fit(); show(i, true);
+fit(); show(i, 0, true);
 </script>
 </body>
 </html>
