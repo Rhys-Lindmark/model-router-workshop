@@ -89,7 +89,7 @@ Targets for your table on my eval. Each also has to beat random routing:
 | [src/jev.js](src/jev.js) | A minimal Jev client: one POST to `https://api.typesafe.ai/v1/systemone` |
 | [src/score.js](src/score.js) · [src/eval.js](src/eval.js) · [src/levels.js](src/levels.js) | Scoring against perfect, fixed and random routing |
 | [data/eval.json](data/eval.json) | My eval’s 168 test prompts, Jev’s answers, and each option’s pass and cost |
-| [slides/](slides/) | The deck, its screenshots, and the archived v1 |
+| [slides/](slides/) | The deck and the archived v1 |
 | [docs/](docs/) | Workshop guide, keys, facilitator guide |
 
 ## About my eval

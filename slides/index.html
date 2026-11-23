@@ -38,6 +38,7 @@ p code, li code { font-size: .85em; background: var(--bg); border: 1px solid var
 pre { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; font-size: 19px; line-height: 1.5; color: var(--ink-2); white-space: pre; overflow: hidden; }
 pre .k { color: #9085e9; } pre .s { color: #8fc98f; } pre .c { color: var(--ink-3); } pre .hit { color: var(--ink); background: rgba(57,135,229,.22); display: inline-block; width: 100%; }
 pre .y { color: var(--good); } pre .w { color: var(--warn); }
+pre .m { color: var(--accent); font-weight: 700; } pre .n { color: var(--ink-3); }
 .row { display: flex; gap: 24px; align-items: stretch; }
 .row > * { flex: 1; min-width: 0; }
 .card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
@@ -200,8 +201,9 @@ body.presenter .presenter-view { display: grid; grid-template-columns: 1fr 1fr; 
 <section class="slide" data-title="Level 1 · mine">
   <div class="kicker"><span class="level">LEVEL 1 · I DO</span>Ask for the decision</div>
   <h2>My first router: one question.</h2>
-  <div class="row" style="align-items:center">
-    <pre style="font-size:15px;flex:0.9">model_choice: {
+  <div class="row">
+    <pre style="font-size:15.5px"><span class="c">// the question: starter/choice.js</span>
+model_choice: {
   type: <span class="s">'choice'</span>,
   instructions:
     <span class="s">'Which model should I use for this prompt?'</span>,
@@ -210,11 +212,24 @@ body.presenter .presenter-view { display: grid; grid-template-columns: 1fr 1fr; 
     Opus: <span class="s">'Claude Opus'</span>,   Fable: <span class="s">'Claude Fable'</span>
   }
 }
-<span class="c">// route = the top answer</span></pre>
-    <img class="shot" src="img/live-choice.png" alt="The live Model Router page: the Choice picks Claude Sonnet at 0.72 for the Roth IRA prompt" style="flex:1.1">
+
+<span class="c">// the code</span>
+route = argmax(probabilities)</pre>
+    <pre style="font-size:15.5px"><span class="c">// Jev’s answer for “Compare a Roth IRA and a</span>
+<span class="c">// traditional 401(k) for someone earning $90k”</span>
+"model_choice": {
+  "choice": <span class="s">"Sonnet"</span>,
+  "probabilities": {
+    "Haiku":  0.11,
+<span class="hit">    "Sonnet": 0.72,                  <span class="m">← top</span></span>
+    "Opus":   0.16,
+    "Fable":  0.01
+  }
+}
+<span class="c">// route → Sonnet. Effort? Why? No answer.</span></pre>
   </div>
   <p class="big frag">Good question or bad question? Why?</p>
-  <div class="foot"><span>Live: “Compare a Roth IRA and a traditional 401(k) for someone earning $90k” → Sonnet</span><span>7</span></div>
+  <div class="foot"><span>Real answer from jev-1.14.0, as on ai.rhyslindmark.com/jev/model-router</span><span>7</span></div>
   <aside class="notes">This is the actual first version from my page. One Choice question, take the top answer. On the Roth IRA prompt it says Sonnet with 0.72. Click, then really ask the room: good or bad? Take two or three answers before moving on. Usual answers: “it’s simple” (true), “it doesn’t know the prices” (true), “how would it know what Opus is?” (exactly).</aside>
 </section>
 
@@ -288,15 +303,35 @@ high_stakes:     { type: <span class="s">'noul'</span>,  instructions: <span cla
 <!-- 12 -->
 <section class="slide" data-title="Level 2 · trace">
   <div class="kicker"><span class="level">LEVEL 2 · I DO</span>What it did</div>
-  <div class="row" style="align-items:flex-start;gap:28px">
-    <img class="shot" src="img/live-v1.jpg" alt="Router v1 on the live page: Claude Opus at high reasoning for the Roth IRA prompt, via the row Expertise and depth is plan" style="flex:1.25">
-    <div style="display:grid;gap:18px">
-      <h2 style="font-size:36px">Roth IRA vs 401(k) → Opus, high effort.</h2>
-      <p>Expertise was 0.40: “unsure”, which I told the code to treat as yes. Plus a plan-sized answer. Row 3 matched.</p>
-      <p class="frag big">Right call? <span class="muted">How would you know?</span></p>
-    </div>
+  <h2 style="font-size:38px">Roth IRA vs 401(k) → Opus, high effort.</h2>
+  <div class="row" style="gap:18px">
+    <pre style="font-size:14.5px;flex:0.85"><span class="c">// Jev judges: one request, five answers</span>
+reasoning_depth  none .00  few .00
+                 <b style="color:var(--ink)">plan 1.00</b>  long .00   → <span class="y">plan</span>
+expertise        0.40               → <span class="w">unsure</span>
+high_stakes      0.92               → <span class="y">yes</span>
+large_output     0.10               → no
+nuanced_writing  0.16               → no
+
+<span class="c">// how my code reads a yes/no answer</span>
+yes ≥ 0.7 · no ≤ 0.3
+<span class="hit">UNSURE_COUNTS_AS = true      <span class="m">← so expertise = yes</span></span></pre>
+    <pre style="font-size:14.5px;flex:1.15"><span class="c">// code decides · src/policy.js</span>
+<span class="c">// effort, from (depth, high stakes)</span>
+<span class="n">{ depth: 'plan', stakes: false, level: 'Medium' },</span>
+<span class="hit">{ depth: 'plan', stakes: true,  level: 'High' }, <span class="m">← match</span></span>
+
+<span class="c">// model: first match wins</span>
+<span class="n">{ test: j =&gt; j.large_output,               tier: 'fable' },</span>
+<span class="n">{ test: j =&gt; j.depth === 3,                tier: 'fable' },</span>
+<span class="hit">{ test: j =&gt; j.expertise &amp;&amp; j.depth &gt;= 2,  tier: 'opus' }, <span class="m">← match</span></span>
+{ test: j =&gt; j.expertise &amp;&amp; j.high_stakes, tier: 'opus' },
+{ test: j =&gt; j.expertise,                  tier: 'sonnet' },
+<span class="c">  … 3 more rows, ending in</span>
+{ test: () =&gt; <span class="k">true</span>,                        tier: 'haiku' },</pre>
   </div>
-  <div class="foot"><span>ai.rhyslindmark.com/jev/model-router · Router v1</span><span>12</span></div>
+  <p class="frag big">Right call? <span class="muted">How would you know?</span></p>
+  <div class="foot"><span>Router v1 · real answers from jev-1.14.0 · the live page shows the same trace</span><span>12</span></div>
   <aside class="notes">Here’s the trace from my page. Every judgment, every row, and you can see exactly why it went to Opus: expertise came back 0.40, my code reads anything between 0.3 and 0.7 as unsure and counts unsure as yes. That’s a policy choice I made, and I can see it and change it. Click: is it the right call? Honestly, you can’t tell from one prompt. That’s Level 3.</aside>
 </section>
 
@@ -343,18 +378,29 @@ high_stakes:     { type: <span class="s">'noul'</span>,  instructions: <span cla
 <!-- 16 -->
 <section class="slide" data-title="What the eval taught">
   <div class="kicker"><span class="level">LEVEL 3 · I DO</span>What the eval taught me</div>
-  <h2 style="font-size:40px">My questions asked about expertise and stakes. The failures were exact details and long procedures.</h2>
-  <div class="row" style="align-items:flex-start">
-    <div style="flex:0.85;display:grid;gap:14px">
-      <p>Remember the quiz? So Router v2 asks four new questions:</p>
-      <pre style="font-size:14.5px">exact_details   exact letters, words or digits?
-long_procedure  a long step-by-step procedure?
-quick_recall    one well-known fact or step?
-writes_code     asks for code?</pre>
-      <p><strong>91.1%</strong> at $3.20, vs “which model?” at 85.7% for $7.37. And the Roth IRA prompt goes to Sonnet, low effort.</p>
-    </div>
-    <img class="shot" src="img/live-v2.jpg" alt="Router v2 on the live page: Claude Sonnet at low effort for the Roth IRA prompt, via the Otherwise row" style="flex:1.15">
+  <h2 style="font-size:38px">The failures weren’t expertise or stakes. They were exact details and long procedures.</h2>
+  <div class="row" style="gap:18px">
+    <pre style="font-size:14.5px;flex:0.9"><span class="c">// Router v2 asks four new questions,</span>
+<span class="c">// with Jev’s answers on the Roth IRA prompt</span>
+exact_details           0.08  no
+<span class="c">  exact letters, words or digits?</span>
+long_procedure          0.11  no
+<span class="c">  a long step-by-step procedure?</span>
+quick_recall            0.06  no
+<span class="c">  one well-known fact or one step?</span>
+writes_code             0.02  no
+<span class="c">  asks for code?</span></pre>
+    <pre style="font-size:13.5px;flex:1.35"><span class="c">// src/policy.js · ROUTER_V2 · first match wins</span>
+<span class="n">1  j.exact_details &amp;&amp; j.long_procedure                   sonnet:high
+2  j.exact_details &amp;&amp; (j.quick_recall || j.depth === 0)  haiku:high
+3  j.exact_details                                       sonnet:high
+4  j.long_procedure                                      sonnet:high
+5  j.large_output                                        opus:low
+6  j.writes_code                                         haiku:high
+7  j.quick_recall                                        haiku:low</span>
+<span class="hit">8  otherwise                                             sonnet:low <span class="m">←</span></span></pre>
   </div>
+  <p>Remember the quiz? <strong>91.1%</strong> at $3.20, vs “which model?” at 85.7% for $7.37. The Roth IRA prompt now goes to Sonnet at low effort: nothing exact, nothing long.</p>
   <div class="foot"><span>Written from the 60 training prompts only · the best re-tune of v1’s thresholds reached 87.5%</span><span>16</span></div>
   <aside class="notes">The fix was better questions, not better thresholds. When I tried re-tuning v1, the best I got was 87.5% at much higher cost. And one honest note: on this prompt set, always using the medium model at high effort scores 93.5% at $3.32, as good as my best router. You only learn that by running the eval. A router earns its keep when you don’t know the right fixed choice in advance, or when your traffic changes.</aside>
 </section>

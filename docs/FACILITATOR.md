@@ -27,10 +27,10 @@ Slides with questions for the room have hidden parts. **→** reveals the next p
 | 4 · The idea | 2:00 | 3:00 | “Which would you ship?” Reveal perfect routing, then the definition. |
 | 5 · Quiz | 3:00 | 4:30 | Let them guess for 15 seconds, reveal, then reveal the pattern. |
 | 6 · Meet Jev | 4:00 | 6:00 | A judgment model, not a decision model. Link it to “classifier”. |
-| 7–8 · Level 1, I do | 5:00 | 8:00 | Show the live Choice card. **Ask: good or bad?** Take 2 or 3 answers, then reveal the list. |
+| 7–8 · Level 1, I do | 5:00 | 8:00 | The Choice question and Jev’s real answer on the Roth IRA prompt. **Ask: good or bad?** Take 2 or 3 answers, then reveal the list. |
 | 9 · Keys | 6:30 | 11:00 | 15 min: point at docs/KEYS.md. 45 min: 5 minutes, walk the room. |
 | 10 · Level 1, you do | 7:00 | 16:00 | 15 min: “open the app, click the quiz prompts”. 45 min: 5 minutes. |
-| 11–12 · Level 2, I do | 7:30 | 21:00 | Judgments and the human test. Show the live v1 trace: Roth IRA → Opus, high. **Ask: right call? How would you know?** |
+| 11–12 · Level 2, I do | 7:30 | 21:00 | Judgments and the human test. Jev’s answers and the v1 table code, with the matched rows: Roth IRA → Opus, high. Optionally show the same trace on your live page. **Ask: right call? How would you know?** |
 | 13 · Level 2, you do | 9:30 | 25:00 | 45 min: 10 minutes writing rows and one question. |
 | 14–16 · Level 3, I do | 10:00 | 35:00 | The eval, the chart, and what it taught: exact details and long procedures. v1 scored worse than Level 1! |
 | 17 · Level 3, you do | 13:00 | 42:00 | Score against Bronze/Silver/Gold, then my-eval. 45 min: 10 to 15 minutes. |
