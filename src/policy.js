@@ -27,7 +27,7 @@ export function judgments(answers, { yes = 0.5 } = {}) {
   return j;
 }
 
-// ---- Router v2: the table built from the eval ---------------------------------
+// ---- Judgment v2: the table built from the eval ---------------------------------
 // Rows were set from 60 training prompts only (never the 168 test prompts).
 // Ordered; first match wins; the last row always matches.
 export const ROUTER_V2 = [
@@ -41,7 +41,7 @@ export const ROUTER_V2 = [
   { when: 'Otherwise',                                   test: () => true,                                             option: 'sonnet:low' }
 ];
 
-// ---- Router v1: the table that shipped first ----------------------------------
+// ---- Judgment v1: the table that shipped first ----------------------------------
 // Two tables: reasoning effort from (depth, stakes), tier from ordered rules.
 // Noul thresholds: yes ≥ 0.7, no ≤ 0.3, and "unsure" in between counts as yes.
 const v1Yes = p => p > 0.3;

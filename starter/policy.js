@@ -28,11 +28,11 @@
 //
 // Targets on the held-out prompts (each must also beat random routing):
 //   Bronze  match "Which model should I use?" for less   ≥ 85.7% for ≤ $7.37
-//   Silver  beat Router v2                                > 91.1% for ≤ $3.32
+//   Silver  beat Judgment v2                                > 91.1% for ≤ $3.32
 //   Gold    match the best single option for less        ≥ 93.5% for < $3.32 (always sonnet:high)
 //
 // Fair warning: you can see the test prompts' results, so you can overfit.
-// The real eval built Router v2 from 60 separate training prompts. A row you
+// The real eval built Judgment v2 from 60 separate training prompts. A row you
 // can explain in one plain sentence is worth more than one extra point.
 
 export const TABLE = [

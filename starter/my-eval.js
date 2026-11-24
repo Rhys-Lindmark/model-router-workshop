@@ -5,7 +5,7 @@
 //
 //   npm run my-eval      runs each prompt on all 6 options through OpenRouter, asks
 //                        Jev your questions, grades every reply, and scores your
-//                        Choice, your table, Router v2 and every fixed option.
+//                        Choice, your table, Judgment v2 and every fixed option.
 //                        Needs both keys. Capped at $1 (MY_EVAL_BUDGET_USD).
 //
 // Replace these with prompts from YOUR project: the things your users actually

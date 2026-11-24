@@ -36,9 +36,9 @@ export function buildPolicies(s, tasks) {
   const P = {
     choice: { name: '"Which model should I use?" (high effort)', pick: t => routeChoice(t.jev, 'high').option },
     mychoice: { name: 'Your Choice (starter/choice.js)', pick: null, missing: null },
-    v1: { name: 'Router v1: the original table', pick: t => routeV1(t.jev).option },
-    v2: { name: 'Router v2: Jev judgments + table', pick: t => route(ROUTER_V2, t.jev).option },
-    v3: { name: 'Router v3: Jev judgments + learned odds', pick: t => t.router_v3_pick },
+    v1: { name: 'Judgment v1: the original table', pick: t => routeV1(t.jev).option },
+    v2: { name: 'Judgment v2: Jev judgments + table', pick: t => route(ROUTER_V2, t.jev).option },
+    v3: { name: 'Judgment v3: Jev judgments + learned odds', pick: t => t.router_v3_pick },
     starter: { name: 'Your table (starter/policy.js)', pick: t => route(s.table, t.jev).option }
   };
   if (!s.choiceIsDefault) {

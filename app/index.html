@@ -131,7 +131,7 @@ function show(d) {
   const pickCard = h('div', { class: 'card' }, h('div', { class: 'pick' },
     h('div', {}, h('span', { class: 'k' }, 'Route'), h('strong', {}, d.option ? S.options[d.option] : `“${d.top}” isn’t a tier`)),
     level === 2 && d.compare.choice ? h('div', {}, h('span', { class: 'k' }, 'Level 1 would pick'), S.options[d.compare.choice]) : null,
-    level === 2 ? h('div', {}, h('span', { class: 'k' }, 'Rhys’s Router v2 picks'), S.options[d.compare.v2]) : null),
+    level === 2 ? h('div', {}, h('span', { class: 'k' }, 'Rhys’s Judgment v2 picks'), S.options[d.compare.v2]) : null),
     h('p', { class: 'muted' }, d.prompt.slice(0, 300), ' · ', meta), d.option ? evalStrip(d, d.option) : null, d.option ? answerBox(d, d.option) : null);
   let left, right;
   if (level === 1) {

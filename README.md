@@ -11,8 +11,8 @@ On my eval’s 168 test prompts:
 | Router | Passed | Cost per 1,000 prompts |
 | - | - | - |
 | Level 1: “Which model should I use?” | 85.7% | $7.37 |
-| Level 2: my first table (Router v1) | 80.4% | $2.76 |
-| Level 2, after the eval: Router v2 | **91.1%** | **$3.20** |
+| Level 2: my first table (Judgment v1) | 80.4% | $2.76 |
+| Level 2, after the eval: Judgment v2 | **91.1%** | **$3.20** |
 | Always the large model, high effort | 94.6% | $11.08 |
 
 The live version of my router: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).
@@ -55,7 +55,7 @@ Targets for your table on my eval. Each also has to beat random routing:
 | | Goal | Passed | Cost per 1,000 |
 | - | - | - | - |
 | Bronze | Match “Which model should I use?” for less | ≥ 85.7% | ≤ $7.37 |
-| Silver | Beat Router v2 | > 91.1% | ≤ $3.32 |
+| Silver | Beat Judgment v2 | > 91.1% | ≤ $3.32 |
 | Gold | Match the best fixed choice (medium model, high effort) for less | ≥ 93.5% | < $3.32 |
 
 ## Commands
@@ -84,7 +84,7 @@ Targets for your table on my eval. Each also has to beat random routing:
 | - | - |
 | [starter/](starter/) | Your files: `choice.js` (Level 1), `questions.js` and `policy.js` (Level 2), `my-eval.js` (Level 3) |
 | [app/](app/) · [scripts/app.js](scripts/app.js) | Your local router page and its small server (keys stay on the server) |
-| [src/questions.js](src/questions.js) · [src/policy.js](src/policy.js) | My questions and tables: Router v1, Router v2 and the Choice |
+| [src/questions.js](src/questions.js) · [src/policy.js](src/policy.js) | My questions and tables: Judgment v1, Judgment v2 and the Choice |
 | [src/router.js](src/router.js) | The router as a library: `routePrompt()` and `callModel()` |
 | [src/jev.js](src/jev.js) | A minimal Jev client: one POST to `https://api.typesafe.ai/v1/systemone` |
 | [src/score.js](src/score.js) · [src/eval.js](src/eval.js) · [src/levels.js](src/levels.js) | Scoring against perfect, fixed and random routing |
@@ -94,7 +94,7 @@ Targets for your table on my eval. Each also has to beat random routing:
 
 ## About my eval
 
-228 prompts in five categories (math, code, writing, logic and facts), every answer checked by code: computed answers, hidden tests for code, and mechanical checks like “exactly 12 words”. Each ran once on Qwen 3.7 Flash, Plus and Max, at low and high reasoning effort. Those three play the small, medium and large tiers that the router names Haiku, Sonnet and Opus. Router v2 was built from 60 training prompts; every score here is on the other 168. Jev `jev-1.14.0`, 2026-11-21, total cost $15. The repo sums per-run costs rounded to a millionth of a dollar, so a cost can differ from the live page by a cent.
+228 prompts in five categories (math, code, writing, logic and facts), every answer checked by code: computed answers, hidden tests for code, and mechanical checks like “exactly 12 words”. Each ran once on Qwen 3.7 Flash, Plus and Max, at low and high reasoning effort. Those three play the small, medium and large tiers that the router names Haiku, Sonnet and Opus. Judgment v2 was built from 60 training prompts; every score here is on the other 168. Jev `jev-1.14.0`, 2026-11-21, total cost $15. The repo sums per-run costs rounded to a millionth of a dollar, so a cost can differ from the live page by a cent.
 
 Limits: one run per prompt and option, open stand-in models rather than the Claude tiers, and graded puzzles rather than real traffic.
 

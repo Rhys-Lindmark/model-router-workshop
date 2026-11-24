@@ -14,12 +14,12 @@ test('168 held-out prompts, each with a result for every option', () => {
   for (const t of tasks) for (const o of OPTIONS) assert.ok(t.results[o] && typeof t.results[o].pass === 'number', `${t.id} ${o}`);
 });
 
-test('Router v2 reproduces the page: 91.1% at $3.20 per 1,000', () => {
+test('Judgment v2 reproduces the page: 91.1% at $3.20 per 1,000', () => {
   const s = score(tasks, t => route(ROUTER_V2, t.jev).option);
   assert.equal(r1(s.pass), 91.1); assert.equal(s.cost.toFixed(2), '3.20');
 });
 
-test('Router v1 reproduces the page: 80.4% at $2.76', () => {
+test('Judgment v1 reproduces the page: 80.4% at $2.76', () => {
   const s = score(tasks, t => routeV1(t.jev).option);
   assert.equal(r1(s.pass), 80.4); assert.equal(s.cost.toFixed(2), '2.76');
 });

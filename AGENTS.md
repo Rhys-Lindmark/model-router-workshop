@@ -59,7 +59,7 @@ npm run score -- --policy starter --misses
 
 The app’s Level 3 tab shows the same thing. Read the misses with them and ask what the failing prompts have in common. The usual finding: the small model fails on exact letters and digits (big multiplications, “no letter e”, counting days across years), not on expert or high-stakes questions.
 
-Targets: Bronze matches “Which model?” for less, Silver beats Router v2, Gold matches the best fixed choice for less. Each must also beat random routing. Gold is reachable with three rows. The spoiler is in `docs/WORKSHOP.md`; show it only if they ask. Warn them once that they can see the test results, so they can overfit.
+Targets: Bronze matches “Which model?” for less, Silver beats Judgment v2, Gold matches the best fixed choice for less. Each must also beat random routing. Gold is reachable with three rows. The spoiler is in `docs/WORKSHOP.md`; show it only if they ask. Warn them once that they can see the test results, so they can overfit.
 
 Then their own eval: help them replace the examples in `starter/my-eval.js` with 5 to 10 prompts from their own project, each with a `check` (helpers `number`, `says`, `without`, `atLeastWords`, `all`, or any function of the reply text). Then:
 
@@ -81,6 +81,6 @@ To use it in their own app, `src/router.js` exports `loadPolicy()`, `routePrompt
 
 - `starter/`: their files (choice.js, questions.js, policy.js, my-eval.js).
 - `app/index.html`, `scripts/app.js`: the local router page and its server. Keys stay on the server.
-- `src/questions.js`, `src/policy.js`: the speaker’s questions, Router v1, Router v2 and the Choice. `src/levels.js`: loads `starter/` fresh on each request.
+- `src/questions.js`, `src/policy.js`: the speaker’s questions, Judgment v1, Judgment v2 and the Choice. `src/levels.js`: loads `starter/` fresh on each request.
 - `src/score.js`, `src/eval.js`: offline scoring. `src/route.js`: route one prompt. `src/router.js`: the router as a library. `src/jev.js`: the Jev client.
 - `data/eval.json`: the speaker’s eval. `docs/`: workshop guide, keys, facilitator guide. `slides/`: the talk.

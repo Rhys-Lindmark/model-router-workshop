@@ -2,7 +2,7 @@
 //   npm run score                              all policies
 //   npm run score -- --policy starter          your table, with targets
 //   npm run score -- --policy starter --misses where your table went wrong
-//   npm run score -- --policy v2 --misses      same, for Router v2
+//   npm run score -- --policy v2 --misses      same, for Judgment v2
 import { loadEval, score, perfect, randomBand } from './eval.js';
 import { OPTIONS, optionName, routeChoice } from './policy.js';
 import { loadStarter, buildPolicies } from './levels.js';
@@ -58,7 +58,7 @@ if (which) {
     const choice = score(tasks, ROUTERS.choice.pick), v2 = score(tasks, ROUTERS.v2.pick), best = score(tasks, () => 'sonnet:high');
     const targets = [
       ['Bronze', `pass ≥ "Which model?" (${pct(choice.pass)}) for ≤ ${usd(choice.cost)}`, s.pass >= choice.pass && s.cost <= choice.cost],
-      ['Silver', `pass > Router v2 (${pct(v2.pass)}) for ≤ ${usd(best.cost)}`, s.pass > v2.pass && s.cost <= best.cost],
+      ['Silver', `pass > Judgment v2 (${pct(v2.pass)}) for ≤ ${usd(best.cost)}`, s.pass > v2.pass && s.cost <= best.cost],
       ['Gold', `pass ≥ always sonnet:high (${pct(best.pass)}) for < ${usd(best.cost)}`, s.pass >= best.pass && s.cost < best.cost]
     ];
     console.log('\n  Targets (each also needs "beats random"):');

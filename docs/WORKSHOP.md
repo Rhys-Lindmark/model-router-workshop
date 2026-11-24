@@ -71,7 +71,7 @@ Or open the app’s **Level 3** tab. The misses list shows prompts your table se
 | | Goal | Passed | Cost per 1,000 |
 | - | - | - | - |
 | Bronze | Match “Which model should I use?” for less | ≥ 85.7% | ≤ $7.37 |
-| Silver | Beat Router v2 | > 91.1% | ≤ $3.32 |
+| Silver | Beat Judgment v2 | > 91.1% | ≤ $3.32 |
 | Gold | Match the best fixed choice (medium model, high effort) for less | ≥ 93.5% | < $3.32 |
 
 Each also has to beat random routing: the same mix of picks dealt to prompts at random, 10,000 times.
@@ -91,7 +91,7 @@ export const TABLE = [
 
 </details>
 
-**A fair warning.** You can see the test results, so you can overfit. I built Router v2 from 60 separate training prompts and only then scored it on these 168. A row you can explain in one sentence is worth more than one extra point.
+**A fair warning.** You can see the test results, so you can overfit. I built Judgment v2 from 60 separate training prompts and only then scored it on these 168. A row you can explain in one sentence is worth more than one extra point.
 
 ### Build your own eval
 
@@ -104,7 +104,7 @@ My eval is puzzles. Yours should be your product’s real prompts.
    npm run my-eval
    ```
 
-   It runs every prompt on all six options, grades every reply, asks Jev your questions, and scores fixed choices, perfect routing, the Choice router, Router v2 and your table on your prompts.
+   It runs every prompt on all six options, grades every reply, asks Jev your questions, and scores fixed choices, perfect routing, the Choice router, Judgment v2 and your table on your prompts.
 3. Read the failed replies in `data/my-eval-results.json` before you trust a check. A wrong check is the most common eval bug.
 
 **Checkpoint.** A table of routers scored on your own prompts.
@@ -121,4 +121,4 @@ Type prompts. Jev judges, your table picks, the picked model answers, and you se
 
 - `src/router.js` has the router as two functions, `routePrompt()` and `callModel()`, to drop into your app.
 - Grow your eval from real traffic. Score your router against fixed choices, perfect routing and random routing every time you change a row or a question. Keep the table in a file the eval imports, so the eval scores exactly what ships.
-- My live page has the interactive version, both evals and Router v3: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).
+- My live page has the interactive version, both evals and Judgment v3: [ai.rhyslindmark.com/jev/model-router](https://ai.rhyslindmark.com/jev/model-router).

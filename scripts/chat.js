@@ -1,7 +1,7 @@
 // Your model router, end to end: type a prompt, Jev judges it, your table
 // picks a model, and that model answers. Needs both keys (docs/KEYS.md).
 //   npm run chat                  uses your table (starter/policy.js)
-//   npm run chat -- --policy v2   uses Router v2
+//   npm run chat -- --policy v2   uses Judgment v2
 import { createInterface } from 'node:readline/promises';
 import { loadPolicy, routePrompt, callModel } from '../src/router.js';
 import { optionName } from '../src/policy.js';

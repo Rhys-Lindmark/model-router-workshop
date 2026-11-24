@@ -44,7 +44,7 @@ One prompt runs through the talk: **“Compare a Roth IRA and a traditional 401(
 
 - Level 1, “which model?”: Sonnet, 0.72, and no reason why (slide 7).
 - Level 2, my first table: Opus at high effort, because expertise came back 0.40, my code reads “unsure” as yes, and the answer is plan-sized (slide 12).
-- After the eval, Router v2: Sonnet at low effort, because nothing about it needs exact details or a long procedure (slide 16).
+- After the eval, Judgment v2: Sonnet at low effort, because nothing about it needs exact details or a long procedure (slide 16).
 
 The quiz prompts (slide 5) are in the app’s chip row, so you can click them live at Level 1 and Level 2.
 
@@ -62,7 +62,7 @@ The quiz prompts (slide 5) are in the app’s chip row, so you can click them li
 
 **“Why are the tiers called Haiku, Sonnet and Opus if you ran Qwen?”** The router’s tables name Claude tiers, as on the live page. The eval used one open model family so differences between tiers weren’t swamped by differences between families.
 
-**“Couldn’t I overfit the table?”** Yes, and in the exercise you can, because you can see the test set. I built Router v2 from 60 separate training prompts.
+**“Couldn’t I overfit the table?”** Yes, and in the exercise you can, because you can see the test set. I built Judgment v2 from 60 separate training prompts.
 
 ## After the session
 

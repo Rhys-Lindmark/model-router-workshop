@@ -7,7 +7,7 @@ import { ROUTER_V2, TIERS, route } from './policy.js';
 
 // Load the table and any extra questions: 'starter' (yours) or 'v2' (the reference).
 export async function loadPolicy(name = 'starter') {
-  if (name === 'v2') return { table: ROUTER_V2, questions: ALL_QUESTIONS, name: 'Router v2 (src/policy.js)' };
+  if (name === 'v2') return { table: ROUTER_V2, questions: ALL_QUESTIONS, name: 'Judgment v2 (src/policy.js)' };
   const [{ TABLE }, { MY_QUESTIONS }] = await Promise.all([import('../starter/policy.js'), import('../starter/questions.js')]);
   return { table: TABLE, questions: { ...ALL_QUESTIONS, ...MY_QUESTIONS }, name: 'Your table (starter/policy.js)' };
 }

@@ -4,7 +4,7 @@
 //
 // Copied from the live page: https://ai.rhyslindmark.com/jev/model-router
 
-// ---- Router v1: the first five judgments ------------------------------------
+// ---- Judgment v1: the first five judgments ------------------------------------
 export const V1_QUESTIONS = {
   reasoning_depth: { type: 'score', instructions: 'How much working out does a good answer to `prompt` take?', criteria: [
     'None: a greeting, a quick lookup, or a fact most people know.',
@@ -30,7 +30,7 @@ export const V1_QUESTIONS = {
   } }
 };
 
-// ---- Router v2: four judgments written from where v1 failed in the eval -----
+// ---- Judgment v2: four judgments written from where v1 failed in the eval -----
 // Failures came from exact, letter-level work and long step-by-step
 // procedures, not from "expertise" or "stakes".
 export const V2_QUESTIONS = {

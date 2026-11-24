@@ -53,12 +53,12 @@ for (const k of [...nouls, ...Object.keys(answers).filter(k => typeof answers[k]
 let picked;
 if (policy === 'v1') {
   const r = routeV1(answers); picked = r.option;
-  table('Router v1 (src/policy.js)', ROUTER_V1.map(x => ({ when: x.when, option: `${x.tier}:…` })), r.row);
+  table('Judgment v1 (src/policy.js)', ROUTER_V1.map(x => ({ when: x.when, option: `${x.tier}:…` })), r.row);
   console.log(c.dim('  Effort: high when depth is "plan" or "long", or depth is "few steps" with high stakes.'));
 } else {
   const t = policy === 'starter' ? (await import('../starter/policy.js')).TABLE : ROUTER_V2;
   const r = route(t, answers); picked = r.option;
-  table(policy === 'starter' ? 'Your table (starter/policy.js)' : 'Router v2 (src/policy.js)', t, r.row);
+  table(policy === 'starter' ? 'Your table (starter/policy.js)' : 'Judgment v2 (src/policy.js)', t, r.row);
 }
 function table(title, rows, hit) {
   console.log(`\n${c.bold('Code decides')}  ${c.dim(`${title} · first match wins`)}`);
